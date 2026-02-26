@@ -20,6 +20,9 @@ class Products implements IProduct {
 
   @Prop({ type: [String] })
   tags?: string[];
+
+  @Prop({ type: [String], default: [] })
+  images!: string[];
 }
 
 export const ProductsSchema = SchemaFactory.createForClass(Products);

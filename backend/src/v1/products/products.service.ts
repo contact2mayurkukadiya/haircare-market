@@ -15,14 +15,24 @@ export class ProductsService {
     private readonly productsModel: Model<ProductsDocument>,
   ) { }
 
+  private mapProduct(product: any): any {
+    if (product?.images && product.images.length > 0) {
+      product.images = product.images.map(
+        (img: string) => img.startsWith('http') || img.startsWith('/static') ? img : `http://localhost:3000/static/products/${img}`
+      );
+    }
+    return product;
+  }
+
   async findAll(): Promise<ProductsDocument[]> {
-    return this.productsModel.find({});
+    const products = await this.productsModel.find({}).lean();
+    return products.map(product => this.mapProduct(product)) as unknown as ProductsDocument[];
   }
 
   async findOne(productId: string): Promise<ProductsDocument> {
-    const product = await this.productsModel.findById(productId);
+    const product = await this.productsModel.findById(productId).lean();
     if (!product) throw new NotFoundException('Product not found');
-    return product;
+    return this.mapProduct(product) as unknown as ProductsDocument;
   }
 
   async create(createProductDto: CreateProductDto): Promise<ProductsDocument> {
@@ -31,7 +41,7 @@ export class ProductsService {
     if (!createdProduct) {
       throw new InternalServerErrorException('Unable to create product, please try again');
     }
-    return createdProduct;
+    return this.mapProduct(createdProduct.toObject()) as unknown as ProductsDocument;
   }
 
   async update(
@@ -57,14 +67,17 @@ export class ProductsService {
         ? [...data.tags, ...updateProductDto.new_tags]
         : updateProductDto.new_tags;
     }
+    if (updateProductDto.new_images) {
+      data.images = updateProductDto.new_images;
+    }
 
     const updatedProduct = await this.productsModel.findByIdAndUpdate(
       productId,
       { ...data },
-      { new: true },
+      { new: true, lean: true },
     );
     if (!updatedProduct) throw new BadRequestException('Unable to update product');
-    return updatedProduct;
+    return this.mapProduct(updatedProduct) as unknown as ProductsDocument;
   }
 
   async remove(productId: string): Promise<string> {

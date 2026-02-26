@@ -1,5 +1,9 @@
 // prettier-ignore
-import { Controller, Post, Get, Body, Param, Put, Delete, UseGuards, Request, UnauthorizedException } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, Put, Delete, UseGuards, Request, UnauthorizedException, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { extname } from 'path';
+import { v4 as uuidv4 } from 'uuid';
+import { diskStorage } from 'multer';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody, ApiParam } from '@nestjs/swagger';
 import { AdminService, type IAdminPreview } from './admin.service';
 import { ProductsService } from '../products/products.service';
@@ -12,6 +16,16 @@ import { AdminDocument } from './entities/admin.schema';
 @ApiTags('Admin')
 @Controller({ version: '1', path: 'admin' })
 export class AdminController {
+    // Shared multer storage configuration for product images
+    private static multerOptions = {
+        storage: diskStorage({
+            destination: './uploads/products',
+            filename: (req, file, cb) => {
+                const uniqueName = `${uuidv4()}${extname(file.originalname)}`;
+                cb(null, uniqueName);
+            },
+        }),
+    };
     constructor(
         private readonly adminService: AdminService,
         private readonly productsService: ProductsService,
@@ -82,8 +96,15 @@ export class AdminController {
     @ApiOperation({ summary: 'Create a new product' })
     @ApiResponse({ status: 201, description: 'The product has been successfully created.' })
     @UseGuards(AdminAuthGuard)
+    @UseInterceptors(FilesInterceptor('images', 10, AdminController.multerOptions))
     @Post('products')
-    createProduct(@Body() createProductDto: CreateProductDto): Promise<IProduct> {
+    createProduct(
+        @UploadedFiles() files: Express.Multer.File[],
+        @Body() createProductDto: CreateProductDto
+    ): Promise<IProduct> {
+        if (files && files.length > 0) {
+            createProductDto.images = files.map((file) => file.filename);
+        }
         return this.productsService.create(createProductDto);
     }
 
@@ -92,11 +113,16 @@ export class AdminController {
     @ApiParam({ name: 'productId', type: 'string', description: 'Product ID' })
     @ApiResponse({ status: 200, description: 'The product has been successfully updated.' })
     @UseGuards(AdminAuthGuard)
+    @UseInterceptors(FilesInterceptor('new_images', 10, AdminController.multerOptions))
     @Put('products/:productId')
     updateProduct(
         @Param('productId') productId: string,
+        @UploadedFiles() files: Express.Multer.File[],
         @Body() updateProductDto: UpdateProductDto,
     ): Promise<IProduct> {
+        if (files && files.length > 0) {
+            updateProductDto.new_images = files.map((file) => file.filename);
+        }
         return this.productsService.update(productId, updateProductDto);
     }
 

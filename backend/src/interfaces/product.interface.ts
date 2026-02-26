@@ -5,4 +5,5 @@ export interface IProduct {
   price: number;
   category: string;
   tags?: string[];
+  images?: string[];
 }

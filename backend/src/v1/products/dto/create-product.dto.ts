@@ -1,5 +1,6 @@
 // prettier-ignore
 import { IsString, IsNotEmpty, IsNumber, IsArray, IsOptional } from 'class-validator';
+import { Type, Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateProductDto {
@@ -14,6 +15,7 @@ export class CreateProductDto {
   desc!: string;
 
   @ApiProperty({ required: true })
+  @Type(() => Number)
   @IsNumber()
   @IsNotEmpty()
   price!: number;
@@ -24,7 +26,23 @@ export class CreateProductDto {
   category!: string;
 
   @ApiProperty({ required: false })
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      try {
+        return JSON.parse(value);
+      } catch (e) {
+        return value.split(',').map((tag: string) => tag.trim());
+      }
+    }
+    return value;
+  })
   @IsArray()
   @IsOptional()
   tags?: string[];
+
+  @ApiProperty({ required: false, type: 'array', items: { type: 'string', format: 'binary' } })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  images?: string[];
 }
