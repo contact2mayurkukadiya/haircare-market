@@ -1,0 +1,44 @@
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import * as nodemailer from 'nodemailer';
+import * as ejs from 'ejs';
+import * as path from 'path';
+
+@Injectable()
+export class EmailService {
+    private transporter: nodemailer.Transporter;
+
+    constructor(private readonly configService: ConfigService) {
+        this.transporter = nodemailer.createTransport({
+            host: this.configService.get<string>('smtp.host'),
+            port: this.configService.get<number>('smtp.port'),
+            secure: false,
+            auth: {
+                user: this.configService.get<string>('smtp.user'),
+                pass: this.configService.get<string>('smtp.pass'),
+            },
+        });
+    }
+
+    async sendOtpEmail(to: string, name: string, otp: string): Promise<void> {
+        const templatePath = path.join(process.cwd(), 'src', 'templates', 'otp.ejs');
+
+        let html: string;
+        try {
+            html = await ejs.renderFile(templatePath, { name, otp, expiryMinutes: 10 });
+        } catch {
+            throw new InternalServerErrorException('Failed to render email template');
+        }
+
+        try {
+            await this.transporter.sendMail({
+                from: `"Haircare Market" <${this.configService.get<string>('smtp.user')}>`,
+                to,
+                subject: 'Verify your Haircare Market account',
+                html,
+            });
+        } catch {
+            throw new InternalServerErrorException('Failed to send OTP email. Please try again.');
+        }
+    }
+}
