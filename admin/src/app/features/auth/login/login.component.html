@@ -1,0 +1,55 @@
+<div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        Admin Login
+      </h2>
+      <p class="mt-2 text-center text-sm text-gray-600">
+        Sign in to manage Haircare Market
+      </p>
+    </div>
+  
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+      <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <form nz-form [formGroup]="validateForm" (ngSubmit)="submitForm()" class="space-y-6">
+          
+          <nz-form-item class="mb-4">
+            <nz-form-control nzErrorTip="Please input your valid email!">
+              <nz-input-group nzPrefixIcon="user" class="rounded-md">
+                <input type="email" nz-input formControlName="email" placeholder="Email address" class="w-full" />
+              </nz-input-group>
+            </nz-form-control>
+          </nz-form-item>
+  
+          <nz-form-item class="mb-4">
+            <nz-form-control nzErrorTip="Please input your Password!">
+              <nz-input-group nzPrefixIcon="lock" class="rounded-md">
+                <input type="password" nz-input formControlName="password" placeholder="Password" class="w-full" />
+              </nz-input-group>
+            </nz-form-control>
+          </nz-form-item>
+  
+          <div class="flex items-center justify-between mt-4">
+            <nz-form-item class="mb-0">
+              <nz-form-control>
+                <label nz-checkbox formControlName="remember">
+                  <span>Remember me</span>
+                </label>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+  
+          <nz-form-item class="mt-6 mb-0">
+            <nz-form-control>
+              <button nz-button 
+                      nzType="primary" 
+                      [nzLoading]="api.isLoading()" 
+                      class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 h-10">
+                Sign in
+              </button>
+            </nz-form-control>
+          </nz-form-item>
+  
+        </form>
+      </div>
+    </div>
+  </div>

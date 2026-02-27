@@ -1,14 +1,17 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
-import { Request } from 'express';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { ExecutionContext } from '@nestjs/common';
 
 @Injectable()
-export class AdminAuthGuard implements CanActivate {
-    canActivate(context: ExecutionContext): boolean {
-        const request = context.switchToHttp().getRequest<Request>();
-        const admin = request.session?.['adminId'];
-        if (!admin) {
-            throw new UnauthorizedException('Admin authentication required. Please login to the admin panel.');
+export class AdminAuthGuard extends AuthGuard('admin-jwt') {
+    canActivate(context: ExecutionContext) {
+        return super.canActivate(context);
+    }
+
+    handleRequest(err: any, user: any) {
+        if (err || !user) {
+            throw err || new UnauthorizedException('Admin authentication required. Please login to the admin panel.');
         }
-        return true;
+        return user;
     }
 }

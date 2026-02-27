@@ -12,6 +12,7 @@ import { ProductsModule } from './products/products.module';
 import { LoggerMiddleware } from './middlewares';
 import { AdminModule } from './admin/admin.module';
 import { EmailModule } from './email/email.module';
+import { CategoriesModule } from './categories/categories.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { EmailModule } from './email/email.module';
     AuthModule,
     ProductsModule,
     AdminModule,
+    CategoriesModule,
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'uploads', 'products'),
       serveRoot: '/static/products',

@@ -3,7 +3,7 @@ interface IConfig {
   database: {
     uri: string;
   };
-  sessionConfig: typeof sessionConfig;
+  jwtSecret: string;
   smtp: {
     host: string;
     port: number;
@@ -19,12 +19,6 @@ interface IConfig {
 
 const port = process.env['PORT'];
 const uri = process.env['MONGODB_URI'];
-const sessionConfig = {
-  secret: process.env['SESSION_SECRET'] || 'SESSION_SECRET',
-  resave: false,
-  saveUninitialized: false,
-  cookie: { maxAge: 36000 },
-};
 
 export default (): IConfig => {
   return {
@@ -32,7 +26,7 @@ export default (): IConfig => {
     database: {
       uri: uri ? uri : 'mongodb://localhost:27017/haircare-product',
     },
-    sessionConfig,
+    jwtSecret: process.env['JWT_SECRET'] || 'haircare_jwt_secret_key',
     smtp: {
       host: process.env['SMTP_HOST'] || 'smtp.gmail.com',
       port: parseInt(process.env['SMTP_PORT'] || '587', 10),
@@ -40,9 +34,10 @@ export default (): IConfig => {
       pass: process.env['SMTP_PASS'] || '',
     },
     admin: {
-      email: process.env['ADMIN_EMAIL'] || 'admin@haircaremarket.com',
-      password: process.env['ADMIN_PASSWORD'] || 'Admin@12345',
+      email: process.env['ADMIN_EMAIL'] || 'admin@gmail.com',
+      password: process.env['ADMIN_PASSWORD'] || 'admin@123',
       name: process.env['ADMIN_NAME'] || 'Admin',
     },
   };
 };
+

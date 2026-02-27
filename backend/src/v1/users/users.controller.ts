@@ -1,18 +1,19 @@
 // prettier-ignore
-import { Controller, Get, Post, Body, Put, Param, Delete, UseGuards, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody, ApiParam } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Put, Param, Delete, UseGuards, Request } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 
-import { CreateUserDto, UpdateUserDto, LoginUserDto, VerifyOtpDto, SendOtpDto } from './dto';
+import { CreateUserDto, UpdateUserDto, SendOtpDto, VerifyOtpDto } from './dto';
 import { UsersService } from './users.service';
 import type { IUserPreview } from 'src/interfaces';
-import { LocalAuthGuard } from '../guards';
+import { JwtAuthGuard } from '../guards';
 import type { UsersDocument } from '.';
-import { User } from '../decorators';
 
 @ApiTags('Users')
 @Controller({ version: '1', path: 'users' })
 export class UsersController {
-  constructor(private readonly usersService: UsersService) { }
+  constructor(
+    private readonly usersService: UsersService,
+  ) { }
 
   private filterUser(user: UsersDocument): IUserPreview {
     return {
@@ -48,20 +49,6 @@ export class UsersController {
     return this.usersService.verifyOtp(verifyOtpDto.email, verifyOtpDto.otp);
   }
 
-  // Login — only verified users can login
-  @ApiOperation({ summary: 'User login' })
-  @ApiBody({ type: LoginUserDto })
-  @ApiResponse({ status: 201, description: 'Returns user profile details upon successful login.' })
-  @UseGuards(LocalAuthGuard)
-  @Post('login')
-  login(@User() user: UsersDocument): IUserPreview {
-    if (!user) throw new NotFoundException('User not found');
-    if (!user.is_verified) {
-      throw new ForbiddenException('Please verify your email before logging in');
-    }
-    return this.filterUser(user);
-  }
-
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200, description: 'Returns an array of all users.' })
   @Get()
@@ -78,32 +65,30 @@ export class UsersController {
     return this.filterUser(user);
   }
 
-  @ApiBearerAuth()
+  @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Update an existing user' })
   @ApiParam({ name: 'userId', type: 'string', description: 'User ID' })
   @ApiResponse({ status: 200, description: 'The user has been successfully updated.' })
-  @UseGuards(LocalAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Put(':userId')
   async update(
-    @User() user: UsersDocument,
+    @Request() req: { user: { sub: string } },
     @Param('userId') userId: string,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<IUserPreview> {
-    const updated = await this.usersService.update(user, userId, updateUserDto);
+    // Only allow the user to update their own profile
+    const userFromDb = await this.usersService.findOne(req.user.sub);
+    const updated = await this.usersService.update(userFromDb, userId, updateUserDto);
     return this.filterUser(updated);
   }
 
-  @ApiBearerAuth()
+  @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Delete a user' })
   @ApiParam({ name: 'userId', type: 'string', description: 'User ID' })
   @ApiResponse({ status: 200, description: 'The user has been successfully deleted.' })
-  @UseGuards(LocalAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Delete(':userId')
-  remove(
-    @Param('userId') userId: string,
-    // eslint-disable-next-line no-unused-vars
-    @Body() _loginUserDto: LoginUserDto,
-  ): Promise<string> {
+  remove(@Param('userId') userId: string): Promise<string> {
     return this.usersService.remove(userId);
   }
 }

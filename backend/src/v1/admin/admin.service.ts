@@ -4,6 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 
 import { AdminDocument } from './entities/admin.schema';
 import { CreateAdminDto } from './dto/create-admin.dto';
@@ -22,7 +23,18 @@ export class AdminService implements OnModuleInit {
         @InjectModel('admins')
         private readonly adminModel: Model<AdminDocument>,
         private readonly configService: ConfigService,
+        private readonly jwtService: JwtService,
     ) { }
+
+    signAdminToken(admin: AdminDocument): { access_token: string } {
+        const payload = {
+            sub: admin._id,
+            email: admin.email,
+            name: admin.name,
+            role: 'admin',
+        };
+        return { access_token: this.jwtService.sign(payload) };
+    }
 
     // Seed a default admin on startup if none exists
     async onModuleInit(): Promise<void> {

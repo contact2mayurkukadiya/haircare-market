@@ -1,0 +1,125 @@
+<div class="mb-6 flex items-center gap-4">
+    <button nz-button type="button" nzType="default" nzShape="circle" (click)="cancel()" class="border-gray-200 w-10 h-10 flex items-center justify-center">
+      <span nz-icon nzType="left"></span>
+    </button>
+    <div>
+      <h2 class="text-2xl font-bold text-gray-800 m-0">{{ isEditMode ? 'Edit Product' : 'Create New Product' }}</h2>
+      <p class="text-gray-500 text-sm m-0">{{ isEditMode ? 'Update the details for this product.' : 'Fill in the details to add a new product to your catalog.' }}</p>
+    </div>
+  </div>
+  
+  <div class="bg-white rounded-xl border border-gray-100 p-6 md:p-8 max-w-4xl shadow-sm">
+    <form nz-form [formGroup]="form" (ngSubmit)="submitForm()" nzLayout="vertical">
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8">
+        <!-- Left Column: Basic Details -->
+        <div class="space-y-4">
+          <nz-form-item>
+            <nz-form-label nzRequired nzFor="name" class="font-medium">Product Name</nz-form-label>
+            <nz-form-control nzErrorTip="Please provide a product name">
+              <input nz-input id="name" formControlName="name" placeholder="e.g. Argan Oil Shampoo" class="rounded-md h-10" />
+            </nz-form-control>
+          </nz-form-item>
+  
+          <div class="grid grid-cols-2 gap-4">
+            <nz-form-item>
+              <nz-form-label nzRequired nzFor="price" class="font-medium">Price ($)</nz-form-label>
+              <nz-form-control nzErrorTip="Please set a valid price">
+                <nz-input-number id="price" formControlName="price" [nzMin]="0" [nzStep]="1" class="w-full rounded-md h-10" [nzPlaceHolder]="'0.00'"></nz-input-number>
+              </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item>
+              <nz-form-label nzRequired nzFor="stock" class="font-medium">Stock Quantity</nz-form-label>
+              <nz-form-control nzErrorTip="Please set a valid stock count">
+                <nz-input-number id="stock" formControlName="stock" [nzMin]="0" [nzStep]="1" class="w-full rounded-md h-10"></nz-input-number>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <nz-form-item>
+              <nz-form-label nzRequired nzFor="category" class="font-medium">Category</nz-form-label>
+              <nz-form-control nzErrorTip="Please select a category">
+                <nz-select id="category" formControlName="category" nzPlaceHolder="Select Category" class="rounded-md">
+                  <nz-option *ngFor="let cat of categories" [nzValue]="cat._id" [nzLabel]="cat.name"></nz-option>
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item>
+              <nz-form-label nzFor="tags" class="font-medium">Tags</nz-form-label>
+              <nz-form-control>
+                <nz-select id="tags" formControlName="tags" nzMode="tags" nzPlaceHolder="Add tags (Enter to add)" class="rounded-md">
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+  
+          <nz-form-item>
+            <nz-form-label nzFor="desc" class="font-medium">Description</nz-form-label>
+            <nz-form-control>
+              <textarea nz-input id="desc" formControlName="desc" placeholder="Describe the product..." [nzAutosize]="{ minRows: 4, maxRows: 8 }" class="rounded-md"></textarea>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+  
+        <!-- Right Column: Media and Toggles -->
+        <div class="space-y-6">
+          <nz-form-item>
+            <nz-form-label class="font-medium">Product Status</nz-form-label>
+            <nz-form-control>
+              <div class="bg-gray-50 p-4 rounded-lg border border-gray-100 flex flex-col gap-4">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <div class="text-sm font-medium text-gray-800">Active</div>
+                    <div class="text-xs text-gray-500">Visible to customers</div>
+                  </div>
+                  <nz-switch formControlName="isActive"></nz-switch>
+                </div>
+                
+                <div class="h-px bg-gray-200"></div>
+                
+                <div class="flex items-center justify-between">
+                  <div>
+                    <div class="text-sm font-medium text-gray-800">Featured</div>
+                    <div class="text-xs text-gray-500">Show on homepage</div>
+                  </div>
+                  <nz-switch formControlName="isFeatured"></nz-switch>
+                </div>
+              </div>
+            </nz-form-control>
+          </nz-form-item>
+  
+          <nz-form-item>
+            <nz-form-label class="font-medium">Product Images</nz-form-label>
+            <nz-form-control>
+              <nz-upload
+                [nzBeforeUpload]="beforeUpload"
+                nzListType="picture-card"
+                [(nzFileList)]="fileList"
+                [nzShowButton]="fileList.length < 5"
+                [nzMultiple]="true"
+                class="block mt-2"
+              >
+                <div class="flex flex-col items-center justify-center h-full text-gray-400 hover:text-blue-500 transition-colors">
+                  <span nz-icon nzType="plus" class="text-xl mb-2"></span>
+                  <div class="text-sm">Upload</div>
+                </div>
+              </nz-upload>
+              <div class="text-xs text-gray-400 mt-2">
+                Upload up to 5 images (JPG/PNG). Max 2MB each.
+              </div>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+  
+      <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-100">
+        <button nz-button type="button" nzType="default" (click)="cancel()" class="h-10 px-6 rounded-md">Cancel</button>
+        <button nz-button type="submit" nzType="primary" [nzLoading]="api.isLoading()" class="h-10 px-6 rounded-md bg-blue-600 hover:bg-blue-700 border-none font-medium">
+          {{ isEditMode ? 'Update Product' : 'Create Product' }}
+        </button>
+      </div>
+    </form>
+  </div>

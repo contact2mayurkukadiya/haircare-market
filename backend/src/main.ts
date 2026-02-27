@@ -3,8 +3,6 @@ import { AppModule as V1Module } from './v1/app.module';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
-import session from 'express-session';
-import passport from 'passport';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(V1Module);
@@ -20,20 +18,19 @@ async function bootstrap(): Promise<void> {
     type: VersioningType.URI,
   });
 
-  app.use(
-    session({
-      secret: 'SECRET',
-      resave: false,
-      saveUninitialized: false,
-    }),
-  );
-  app.use(passport.initialize());
-  app.use(passport.session());
+  app.enableCors({
+    origin: 'http://localhost:4200',
+    credentials: true,
+  });
 
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('exp-api')
-    .setDescription('exp api description')
+    .setTitle('Haircare Market API')
+    .setDescription('Haircare Market REST API')
     .setVersion('1.0')
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      'access-token',
+    )
     .build();
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api', app, document);
@@ -42,3 +39,4 @@ async function bootstrap(): Promise<void> {
   console.log(`App is running on url: ${await app.getUrl()}`);
 }
 bootstrap();
+

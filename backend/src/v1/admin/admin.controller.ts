@@ -9,9 +9,8 @@ import { AdminService, type IAdminPreview } from './admin.service';
 import { ProductsService } from '../products/products.service';
 import { CreateProductDto, UpdateProductDto } from '../products/dto';
 import { IProduct } from 'src/interfaces';
-import { AdminLocalAuthGuard } from './guards/admin-local-auth.guard';
 import { AdminAuthGuard } from './guards/admin-auth.guard';
-import { AdminDocument } from './entities/admin.schema';
+import type { JwtAdminPayload } from './strategies/admin-jwt.strategy';
 
 @ApiTags('Admin')
 @Controller({ version: '1', path: 'admin' })
@@ -37,35 +36,24 @@ export class AdminController {
 
     @ApiOperation({ summary: 'Admin login' })
     @ApiBody({ schema: { type: 'object', properties: { email: { type: 'string' }, password: { type: 'string' } } } })
-    @ApiResponse({ status: 201, description: 'Returns admin profile details upon successful login.' })
-    @UseGuards(AdminLocalAuthGuard)
+    @ApiResponse({ status: 201, description: 'Returns JWT access token and admin profile upon successful login.' })
     @Post('login')
-    login(@Request() req: { user: AdminDocument }): IAdminPreview {
-        const admin = req.user;
-        if (!admin) throw new UnauthorizedException('Invalid credentials');
-        // Store admin ID manually in session (separate from user session)
-        (req as any).session['adminId'] = admin._id?.toString();
-        return { _id: admin._id?.toString(), name: admin.name, email: admin.email };
+    async login(@Body() body: { email: string; password: string }): Promise<{ access_token: string; admin: IAdminPreview }> {
+        const admin = await this.adminService.validateAdmin(body.email, body.password);
+        const { access_token } = this.adminService.signAdminToken(admin);
+        return {
+            access_token,
+            admin: { _id: admin._id?.toString(), name: admin.name, email: admin.email },
+        };
     }
 
-    @ApiBearerAuth()
-    @ApiOperation({ summary: 'Admin logout' })
-    @ApiResponse({ status: 201, description: 'Successfully logged out.' })
-    @UseGuards(AdminAuthGuard)
-    @Post('logout')
-    logout(@Request() req: { session: Record<string, unknown> }): { message: string } {
-        delete req.session['adminId'];
-        return { message: 'Logged out successfully' };
-    }
-
-    @ApiBearerAuth()
+    @ApiBearerAuth('access-token')
     @ApiOperation({ summary: 'Get current admin profile' })
     @ApiResponse({ status: 200, description: 'Returns the currently logged-in admin details.' })
     @UseGuards(AdminAuthGuard)
     @Get('me')
-    async getProfile(@Request() req: { session: Record<string, unknown> }): Promise<IAdminPreview> {
-        const adminId = req.session['adminId'] as string;
-        const admin = await this.adminService.findOne(adminId);
+    async getProfile(@Request() req: { user: JwtAdminPayload }): Promise<IAdminPreview> {
+        const admin = await this.adminService.findOne(req.user.sub);
         return { _id: admin._id?.toString(), name: admin.name, email: admin.email };
     }
 
@@ -73,7 +61,7 @@ export class AdminController {
      * PRODUCTS
      **************************************************************/
 
-    @ApiBearerAuth()
+    @ApiBearerAuth('access-token')
     @ApiOperation({ summary: 'Get all products (Admin)' })
     @ApiResponse({ status: 200, description: 'Returns an array of all products.' })
     @UseGuards(AdminAuthGuard)
@@ -82,7 +70,7 @@ export class AdminController {
         return this.productsService.findAll();
     }
 
-    @ApiBearerAuth()
+    @ApiBearerAuth('access-token')
     @ApiOperation({ summary: 'Get a specific product by ID (Admin)' })
     @ApiParam({ name: 'productId', type: 'string', description: 'Product ID' })
     @ApiResponse({ status: 200, description: 'Returns the specified product details.' })
@@ -92,7 +80,7 @@ export class AdminController {
         return this.productsService.findOne(productId);
     }
 
-    @ApiBearerAuth()
+    @ApiBearerAuth('access-token')
     @ApiOperation({ summary: 'Create a new product' })
     @ApiResponse({ status: 201, description: 'The product has been successfully created.' })
     @UseGuards(AdminAuthGuard)
@@ -108,7 +96,7 @@ export class AdminController {
         return this.productsService.create(createProductDto);
     }
 
-    @ApiBearerAuth()
+    @ApiBearerAuth('access-token')
     @ApiOperation({ summary: 'Update an existing product' })
     @ApiParam({ name: 'productId', type: 'string', description: 'Product ID' })
     @ApiResponse({ status: 200, description: 'The product has been successfully updated.' })
@@ -126,7 +114,7 @@ export class AdminController {
         return this.productsService.update(productId, updateProductDto);
     }
 
-    @ApiBearerAuth()
+    @ApiBearerAuth('access-token')
     @ApiOperation({ summary: 'Delete a product' })
     @ApiParam({ name: 'productId', type: 'string', description: 'Product ID' })
     @ApiResponse({ status: 200, description: 'The product has been successfully deleted.' })

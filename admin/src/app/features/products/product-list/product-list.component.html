@@ -1,0 +1,93 @@
+<div class="mb-6 flex justify-between items-center">
+    <div>
+      <h2 class="text-2xl font-bold text-gray-800">Products</h2>
+      <p class="text-gray-500 text-sm">Manage your store's inventory and product details.</p>
+    </div>
+    <button nz-button nzType="primary" (click)="createProduct()" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 border-none rounded-md px-4 h-10">
+      <span nz-icon nzType="plus"></span> Add Product
+    </button>
+  </div>
+  
+  <nz-table #basicTable 
+            [nzData]="products()" 
+            [nzLoading]="api.isLoading()"
+            [nzFrontPagination]="true"
+            [nzShowSizeChanger]="true"
+            class="bg-white rounded-lg overflow-hidden border border-gray-100">
+    <thead class="bg-gray-50">
+      <tr>
+        <th nzWidth="80px">Image</th>
+        <th>Product Name</th>
+        <th>Price</th>
+        <th>Stock</th>
+        <th>Category</th>
+        <th>Status</th>
+        <th nzWidth="120px" nzAlign="center">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Using Angular 17+ @for control flow instead of *ngFor -->
+      @for (data of basicTable.data; track data._id) {
+        <tr class="hover:bg-gray-50 transition-colors">
+          <td>
+            <div
+              class="img-preview-box"
+              (mouseenter)="onImageHoverStart(data)"
+              (mouseleave)="onImageHoverEnd(data)">
+              @if (data.images && data.images.length > 0) {
+                <img
+                  [src]="getActiveImage(data)"
+                  [alt]="data.name"
+                  [class.sliding]="isSliding(data._id)"
+                  onerror="this.src='/placeholder.webp'">
+              } @else {
+                <span nz-icon nzType="picture" class="text-gray-400"></span>
+              }
+            </div>
+          </td>
+          <td class="font-medium text-gray-800">{{ data.name }}</td>
+          <td>
+            <div class="flex flex-col">
+              <span class="font-semibold text-gray-900">${{ data.price }}</span>
+            </div>
+          </td>
+          <td>
+            <nz-tag [nzColor]="data.stock > 10 ? 'success' : (data.stock > 0 ? 'warning' : 'error')" class="rounded-full px-3">
+              {{ data.stock }} in stock
+            </nz-tag>
+          </td>
+          <td>
+            <span class="text-gray-600">{{ data.category?.name || 'Uncategorized' }}</span>
+          </td>
+          <td>
+            <nz-tag [nzColor]="data.isActive ? 'blue' : 'default'">
+              {{ data.isActive ? 'Active' : 'Inactive' }}
+            </nz-tag>
+            @if (data.isFeatured) {
+              <nz-tag nzColor="purple" class="ml-1">Featured</nz-tag>
+            }
+          </td>
+          <td nzAlign="center">
+            <div class="flex items-center justify-center gap-2">
+              <button nz-button nzType="text" nzTooltipTitle="Edit" nzTooltipPlacement="top" nz-tooltip (click)="editProduct(data)" class="text-blue-600 hover:bg-blue-50 rounded-full w-8 h-8 p-0 flex items-center justify-center">
+                <span nz-icon nzType="edit"></span>
+              </button>
+              
+              <button nz-button nzType="text" nzTooltipTitle="Delete" nzTooltipPlacement="top" nz-tooltip 
+                      class="text-red-500 hover:bg-red-50 rounded-full w-8 h-8 p-0 flex items-center justify-center"
+                      nz-popconfirm nzPopconfirmTitle="Are you sure to delete this product?" 
+                      nzPopconfirmPlacement="left" (nzOnConfirm)="deleteProduct(data._id)">
+                <span nz-icon nzType="delete"></span>
+              </button>
+            </div>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+            <td colspan="6" class="text-center py-8 text-gray-500">
+                No products found. Click "Add Product" to get started!
+            </td>
+        </tr>
+      }
+    </tbody>
+  </nz-table>

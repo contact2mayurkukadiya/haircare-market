@@ -12,3 +12,4 @@ import { EmailModule } from '../email/email.module';
   exports: [UsersModel, UsersService],
 })
 export class UsersModule { }
+
