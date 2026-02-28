@@ -29,7 +29,7 @@ export class VsViewportComponent implements AfterViewInit, OnChanges, OnDestroy 
     @Input() itemMinWidth = 280;    // min card width for auto-fill columns
 
     /** Emits when window scroll nears the bottom — connect to productService.loadMore() */
-    @Output() loadMore = new EventEmitter<void>();
+    // @Output() loadMore = new EventEmitter<void>();
 
     gridRows: any[][] = [];
 
@@ -60,18 +60,18 @@ export class VsViewportComponent implements AfterViewInit, OnChanges, OnDestroy 
 
         // ── Window scroll → emit loadMore when nearing page bottom ────────────────
         // Replaces IntersectionObserver; works because scrollWindow uses window scroll
-        this.zone.runOutsideAngular(() => {
-            fromEvent(window, 'scroll').pipe(
-                debounceTime(100),
-                takeUntil(this.destroy$)
-            ).subscribe(() => {
-                const scrolledTo = window.scrollY + window.innerHeight;
-                const pageHeight = document.documentElement.scrollHeight;
-                if (scrolledTo >= pageHeight - 400) {
-                    this.zone.run(() => this.loadMore.emit());
-                }
-            });
-        });
+        // this.zone.runOutsideAngular(() => {
+        //     fromEvent(window, 'scroll').pipe(
+        //         debounceTime(100),
+        //         takeUntil(this.destroy$)
+        //     ).subscribe(() => {
+        //         const scrolledTo = window.scrollY + window.innerHeight;
+        //         const pageHeight = document.documentElement.scrollHeight;
+        //         if (scrolledTo >= pageHeight - 400) {
+        //             this.zone.run(() => this.loadMore.emit());
+        //         }
+        //     });
+        // });
     }
 
     ngOnChanges(changes: SimpleChanges) {

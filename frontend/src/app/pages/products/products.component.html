@@ -124,7 +124,7 @@
         } @else {
         <!-- PRODUCTS CONTAINER -->
         <vs-viewport [items]="filteredProducts()" [mode]="viewMode" [gridRowHeight]="460" [listItemHeight]="192"
-          [itemMinWidth]="280" (loadMore)="onLoadMore()">
+          [itemMinWidth]="280">
 
           <!-- ══ GRID CARD TEMPLATE ══ -->
           <ng-template vsGridItem let-product>
@@ -275,13 +275,19 @@
 
         </vs-viewport>
 
-        <!-- Loading more indicator (shown outside the viewport) -->
-        @if (productService.loadingMore()) {
-        <div class="flex items-center justify-center gap-3 text-gray-400 py-8">
-          <div class="w-5 h-5 border-2 border-gray-200 border-t-[#1a6b3c] rounded-full animate-spin"></div>
-          <span class="text-sm">Loading more products...</span>
+        <div class="mt-8 flex justify-center" *ngIf="productService.hasMore()">
+          <button type="button" class="btn-outline px-5 py-2 text-sm font-semibold" (click)="onLoadMore()"
+            [disabled]="productService.loadingMore()">
+            <ng-container *ngIf="!productService.loadingMore(); else loadingMoreTpl">
+              Load more products
+            </ng-container>
+            <ng-template #loadingMoreTpl>
+              Loading more products…
+            </ng-template>
+          </button>
         </div>
-        } @else if (!productService.hasMore() && filteredProducts().length > 0) {
+        <!-- Loading more indicator (shown outside the viewport) -->
+        @if (!productService.hasMore() && filteredProducts().length > 0) {
         <p class="text-center text-sm text-gray-400 py-6">
           ✓ You've seen all {{ productService.total() }} products
         </p>
