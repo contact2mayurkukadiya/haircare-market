@@ -1,0 +1,23 @@
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-logo">📧</div>
+    <h2 class="auth-title">Verify Your Email</h2>
+    <p class="auth-sub">We sent a 6-digit code to <strong>{{ email }}</strong></p>
+    <form (ngSubmit)="onSubmit()" class="auth-form">
+      <div class="form-group">
+        <label>OTP Code</label>
+        <input type="text" [(ngModel)]="otp" name="otp" placeholder="Enter 6-digit code"
+               maxlength="6" required class="form-input otp-input">
+      </div>
+      @if (success()) { <div class="form-success">{{ success() }}</div> }
+      @if (error()) { <div class="form-error">{{ error() }}</div> }
+      <button type="submit" class="btn-primary submit-btn" [disabled]="loading()">
+        @if (loading()) { Verifying... } @else { Verify OTP }
+      </button>
+      <button type="button" class="resend-btn" (click)="resend()" [disabled]="resending()">
+        @if (resending()) { Sending... } @else { Resend OTP }
+      </button>
+    </form>
+    <p class="auth-footer">Verified? <a routerLink="/auth/login" class="auth-link">Sign In</a></p>
+  </div>
+</div>

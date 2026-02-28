@@ -1,5 +1,5 @@
 // prettier-ignore
-import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { ProductsService } from './products.service';
 import { CreateProductDto, UpdateProductDto } from './dto';
@@ -10,12 +10,14 @@ import { IProduct } from 'src/interfaces';
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) { }
 
-  // Public read-only routes — anyone can browse products
-  @ApiOperation({ summary: 'Get all products' })
-  @ApiResponse({ status: 200, description: 'Returns an array of all products.' })
+  @ApiOperation({ summary: 'Get all products (paginated)' })
+  @ApiResponse({ status: 200, description: 'Returns paginated products.' })
   @Get()
-  findAll(): Promise<IProduct[]> {
-    return this.productsService.findAll();
+  findAll(
+    @Query('page') page = 1,
+    @Query('limit') limit = 12,
+  ) {
+    return this.productsService.findAll(+page, +limit);
   }
 
   @ApiOperation({ summary: 'Get a specific product by ID' })

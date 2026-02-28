@@ -1,0 +1,49 @@
+<header class="navbar-wrapper" [class.scrolled]="isScrolled()">
+  <div class="navbar-inner container-main">
+    <!-- Logo -->
+    <a routerLink="/" class="navbar-logo">
+      <span class="logo-leaf">🌿</span>
+      <div>
+        <span class="logo-name">HairCare</span>
+        <span class="logo-market">Market</span>
+      </div>
+    </a>
+
+    <!-- Center Nav -->
+    <nav class="navbar-nav">
+      <a routerLink="/" routerLinkActive="nav-active" [routerLinkActiveOptions]="{exact:true}" class="nav-link">Home</a>
+      <a routerLink="/products" routerLinkActive="nav-active" class="nav-link">Products</a>
+    </nav>
+
+    <!-- Right Actions -->
+    <div class="navbar-actions">
+      <!-- Cart -->
+      <a routerLink="/cart" class="nav-icon-btn" title="Cart">
+        <nz-badge [nzCount]="cart.count()" [nzOverflowCount]="99">
+          <span nz-icon nzType="shopping-cart" class="nav-icon-glyph"></span>
+        </nz-badge>
+      </a>
+
+      <!-- Auth -->
+      @if (auth.isLoggedIn()) {
+        <div nz-dropdown [nzDropdownMenu]="userMenu" nzTrigger="click" class="user-avatar-btn" title="Account">
+          <div class="user-avatar">{{ auth.user()!.name[0].toUpperCase() }}</div>
+        </div>
+        <nz-dropdown-menu #userMenu="nzDropdownMenu">
+          <ul nz-menu class="user-dropdown">
+            <li nz-menu-item class="user-info-item">
+              <strong>{{ auth.user()!.name }}</strong>
+              <span>{{ auth.user()!.email }}</span>
+            </li>
+            <li nz-menu-divider></li>
+            <li nz-menu-item (click)="auth.logout()">
+              <span nz-icon nzType="logout"></span> Logout
+            </li>
+          </ul>
+        </nz-dropdown-menu>
+      } @else {
+        <a routerLink="/auth/login" class="btn-primary sign-in-btn">Sign In</a>
+      }
+    </div>
+  </div>
+</header>

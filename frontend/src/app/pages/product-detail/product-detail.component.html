@@ -1,0 +1,153 @@
+<div class="detail-page">
+  <div class="container-main">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+      <a routerLink="/">Home</a>
+      <span class="sep">/</span>
+      <a routerLink="/products">Products</a>
+      <span class="sep">/</span>
+      <span class="current">{{ product()?.name }}</span>
+    </nav>
+  </div>
+
+  @if (productService.loading()) {
+    <div class="container-main">
+      <div class="detail-grid">
+        <div class="skeleton" style="height:420px; border-radius:16px; width:100%;"></div>
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+          @for (i of [1,2,3,4]; track i) {
+            <div class="skeleton" style="height:24px; border-radius:8px;" [style.width]="i < 3 ? '80%' : '40%'"></div>
+          }
+        </div>
+      </div>
+    </div>
+  } @else if (product()) {
+    <div class="container-main">
+      <div class="detail-grid">
+
+        <!-- LEFT: Image Gallery -->
+        <div class="gallery-section">
+          <!-- Main Image Display -->
+          <div class="main-img-frame">
+            @if (product()!.images && product()!.images.length > 0) {
+              <img [src]="activeImage || product()!.images[0]"
+                   [alt]="product()!.name"
+                   class="main-img">
+              <div class="img-nav">
+                <button class="img-nav-btn" (click)="prevImage()" [disabled]="activeIndex === 0">
+                  <span nz-icon nzType="left"></span>
+                </button>
+                <span class="img-counter">{{ activeIndex + 1 }} / {{ product()!.images.length }}</span>
+                <button class="img-nav-btn" (click)="nextImage()" [disabled]="activeIndex >= product()!.images.length - 1">
+                  <span nz-icon nzType="right"></span>
+                </button>
+              </div>
+            } @else {
+              <div class="no-img">🧴</div>
+            }
+          </div>
+
+          <!-- Thumbnails strip -->
+          @if (product()!.images && product()!.images.length > 1) {
+            <div class="thumb-strip">
+              @for (img of product()!.images; track img; let i = $index) {
+                <button class="thumb-btn" [class.active]="activeIndex === i" (click)="selectImage(i, img)">
+                  <img [src]="img" [alt]="product()!.name + ' ' + (i+1)" class="thumb-img">
+                </button>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- RIGHT: Product Info -->
+        <div class="info-section">
+          <!-- Category + badges -->
+          <div class="info-badges">
+            <span class="detail-category">{{ getCatName() }}</span>
+            @if (product()!.isFeatured) {
+              <span class="badge-featured-lg">⭐ Featured</span>
+            }
+          </div>
+
+          <h1 class="detail-name">{{ product()!.name }}</h1>
+
+          <!-- Price -->
+          <div class="price-block">
+            <span class="detail-price">{{ formatPrice(product()!.price) }}</span>
+            <span class="stock-pill"
+                  [class.in-stock]="product()!.stock > 10"
+                  [class.low-stock]="product()!.stock > 0 && product()!.stock <= 10"
+                  [class.oos]="product()!.stock === 0">
+              @if (product()!.stock === 0) { ✕ Out of Stock }
+              @else if (product()!.stock <= 10) { ⚠ Only {{ product()!.stock }} left }
+              @else { ✓ In Stock }
+            </span>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Description -->
+          <div class="desc-block">
+            <h3 class="desc-label">About this product</h3>
+            <p class="desc-text">{{ product()!.desc }}</p>
+          </div>
+
+          <!-- Tags -->
+          @if (product()!.tags && product()!.tags!.length > 0) {
+            <div class="tag-section">
+              @for (tag of product()!.tags!; track tag) {
+                <span class="tag">{{ tag }}</span>
+              }
+            </div>
+          }
+
+          <div class="divider"></div>
+
+          <!-- Quantity + Add to Cart -->
+          <div class="atc-block">
+            <label class="qty-label">Quantity</label>
+            <div class="atc-row">
+              <div class="qty-selector">
+                <button (click)="decQty()" [disabled]="qty() <= 1">−</button>
+                <span class="qty-val">{{ qty() }}</span>
+                <button (click)="incQty()" [disabled]="qty() >= product()!.stock">+</button>
+              </div>
+              <button class="btn-atc" [disabled]="product()!.stock === 0" (click)="addToCart()">
+                <span nz-icon nzType="shopping-cart"></span>
+                {{ cart.isInCart(product()!._id) ? '✓ In Cart — Update' : 'Add to Cart' }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Trust badges -->
+          <div class="trust-grid">
+            <div class="trust-item">
+              <span class="trust-icon">🌿</span>
+              <div><strong>100% Natural</strong><p>Organic ingredients</p></div>
+            </div>
+            <div class="trust-item">
+              <span class="trust-icon">🚚</span>
+              <div><strong>Free Delivery</strong><p>On all orders</p></div>
+            </div>
+            <div class="trust-item">
+              <span class="trust-icon">🔄</span>
+              <div><strong>30-day Returns</strong><p>No questions asked</p></div>
+            </div>
+            <div class="trust-item">
+              <span class="trust-icon">💯</span>
+              <div><strong>Quality Assured</strong><p>Dermatologist tested</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="container-main">
+      <div class="not-found">
+        <span>😞</span>
+        <h3>Product not found</h3>
+        <a routerLink="/products" class="btn-primary">Browse All Products</a>
+      </div>
+    </div>
+  }
+</div>

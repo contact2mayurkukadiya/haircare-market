@@ -1,0 +1,56 @@
+/* Shared auth styles used by login, register, verify-otp */
+.auth-wrapper {
+  min-height: calc(100vh - 200px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background: linear-gradient(135deg, #e8f5ed 0%, #f0faf4 100%);
+}
+
+.auth-card {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+}
+
+.auth-logo { font-size: 2.5rem; margin-bottom: 0.75rem; }
+.auth-title { font-size: 1.6rem; margin-bottom: 0.35rem; }
+.auth-sub { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 2rem; }
+
+.auth-form { display: flex; flex-direction: column; gap: 1.25rem; text-align: left; }
+
+.form-group {
+  display: flex; flex-direction: column; gap: 0.4rem;
+  label { font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); }
+}
+
+.form-input {
+  padding: 0.65rem 1rem;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  &:focus { border-color: var(--brand-primary); box-shadow: 0 0 0 3px rgba(26,107,60,0.12); }
+}
+
+.otp-input { text-align: center; letter-spacing: 0.35em; font-size: 1.3rem; font-weight: 700; }
+
+.form-error { background: #fee2e2; color: #b91c1c; font-size: 0.85rem; padding: 0.65rem 1rem; border-radius: 8px; }
+.form-success { background: #dcfce7; color: #166534; font-size: 0.85rem; padding: 0.65rem 1rem; border-radius: 8px; }
+
+.submit-btn { width: 100%; justify-content: center; padding: 0.7rem; }
+
+.resend-btn {
+  background: none; border: none; color: var(--brand-primary); font-size: 0.88rem;
+  font-weight: 600; cursor: pointer; padding: 0.25rem; text-align: center;
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.auth-footer { font-size: 0.88rem; color: var(--text-muted); margin-top: 1.5rem; }
+.auth-link { color: var(--brand-primary); font-weight: 600; text-decoration: none; &:hover { text-decoration: underline; } }

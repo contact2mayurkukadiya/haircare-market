@@ -1,6 +1,14 @@
 // prettier-ignore
-import { BadRequestException, HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { Model } from 'mongoose';
+
+export interface PaginatedResult<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
 import { unlink } from 'fs/promises';
 import { join } from 'path';
 
@@ -28,9 +36,19 @@ export class ProductsService {
     return product;
   }
 
-  async findAll(): Promise<IProduct[]> {
-    const products = await this.productsModel.find({}).populate('category').lean();
-    return products.map(product => this.mapProduct(product)) as unknown as IProduct[];
+  async findAll(page = 1, limit = 12): Promise<PaginatedResult<IProduct>> {
+    const skip = (page - 1) * limit;
+    const [products, total] = await Promise.all([
+      this.productsModel.find({}).populate('category').sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+      this.productsModel.countDocuments({}),
+    ]);
+    return {
+      data: products.map(p => this.mapProduct(p)) as unknown as IProduct[],
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async findOne(productId: string): Promise<IProduct> {

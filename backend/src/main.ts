@@ -19,7 +19,7 @@ async function bootstrap(): Promise<void> {
   });
 
   app.enableCors({
-    origin: 'http://localhost:4200',
+    origin: '*',
     credentials: true,
   });
 

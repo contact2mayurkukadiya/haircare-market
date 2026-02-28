@@ -1,0 +1,11 @@
+{
+    "scripts": {
+        "start:admin": "cd admin && npm run start",
+        "start:frontend": "cd frontend && npm run start",
+        "start:backend": "cd backend && npm run start:dev",
+        "start:context": "cd context-server && source venv/bin/activate && python context_server.py"
+    },
+    "devDependencies": {
+        "npm-run-all": "^4.1.5"
+    }
+}

@@ -66,8 +66,10 @@ export class AdminController {
     @ApiResponse({ status: 200, description: 'Returns an array of all products.' })
     @UseGuards(AdminAuthGuard)
     @Get('products')
-    getAllProducts(): Promise<IProduct[]> {
-        return this.productsService.findAll();
+    async getAllProducts(): Promise<IProduct[]> {
+        // Admin needs all products — use large limit, return only data array
+        const result = await this.productsService.findAll(1, 1000);
+        return result.data;
     }
 
     @ApiBearerAuth('access-token')

@@ -1,0 +1,44 @@
+/* 
+  Custom styles for Products Component 
+  Most styles have been moved to Tailwind CSS.
+  Only complex scrollbar and specific overrides remain here.
+*/
+
+.custom-scroll {
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+    &:hover {
+      background: #94a3b8;
+    }
+  }
+}
+
+.active-toggle {
+  background: #1a6b3c !important;
+  color: white !important;
+  border-color: #1a6b3c !important;
+}
+
+/* Line clamp safety for older browsers */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Animation for initial skeletons */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .5; }
+}
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
