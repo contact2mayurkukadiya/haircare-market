@@ -10,31 +10,34 @@
   <div class="max-w-7xl mx-auto px-4 md:px-8">
     <div class="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-8 items-start pb-12">
       <!-- Sidebar -->
-      <aside class="hidden md:block bg-white rounded-xl border border-gray-200 p-5 sticky top-20 shadow-sm">
+      <aside class="hidden md:block bg-white rounded-xl border border-gray-200 p-5
+              shadow-sm
+              sticky top-[100px] self-start
+              max-h-[calc(100vh-120px)] overflow-y-auto">
         <div class="mb-6">
           <h3 class="text-[0.82rem] font-bold uppercase tracking-wider text-gray-400 mb-3">Categories</h3>
           <button class="block w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-150 mb-1"
-                  [class]="!selectedCat() ? 'bg-[#e8f5ed] text-[#1a6b3c] font-semibold' : 'text-gray-600 hover:bg-[#e8f5ed] hover:text-[#1a6b3c]'"
-                  (click)="selectCat(null)">
+            [class]="!selectedCat() ? 'bg-[#e8f5ed] text-[#1a6b3c] font-semibold' : 'text-gray-600 hover:bg-[#e8f5ed] hover:text-[#1a6b3c]'"
+            (click)="selectCat(null)">
             All Products
           </button>
           @for (cat of categoryService.categories(); track cat._id) {
-            <button class="block w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-150 mb-1"
-                    [class]="selectedCat() === cat._id ? 'bg-[#e8f5ed] text-[#1a6b3c] font-semibold' : 'text-gray-600 hover:bg-[#e8f5ed] hover:text-[#1a6b3c]'"
-                    (click)="selectCat(cat._id)">
-              {{ cat.name }}
-            </button>
+          <button class="block w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-150 mb-1"
+            [class]="selectedCat() === cat._id ? 'bg-[#e8f5ed] text-[#1a6b3c] font-semibold' : 'text-gray-600 hover:bg-[#e8f5ed] hover:text-[#1a6b3c]'"
+            (click)="selectCat(cat._id)">
+            {{ cat.name }}
+          </button>
           }
         </div>
 
         <div class="mb-6">
           <h3 class="text-[0.82rem] font-bold uppercase tracking-wider text-gray-400 mb-3">Price Range</h3>
           @for (range of priceRanges; track range.label) {
-            <button class="block w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-150 mb-1"
-                    [class]="selectedRange() === range.label ? 'bg-[#e8f5ed] text-[#1a6b3c] font-semibold' : 'text-gray-600 hover:bg-[#e8f5ed] hover:text-[#1a6b3c]'"
-                    (click)="selectRange(range)">
-              {{ range.label }}
-            </button>
+          <button class="block w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-150 mb-1"
+            [class]="selectedRange() === range.label ? 'bg-[#e8f5ed] text-[#1a6b3c] font-semibold' : 'text-gray-600 hover:bg-[#e8f5ed] hover:text-[#1a6b3c]'"
+            (click)="selectRange(range)">
+            {{ range.label }}
+          </button>
           }
         </div>
 
@@ -51,9 +54,11 @@
       <main>
         <!-- Toolbar -->
         <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
-          <span class="text-sm text-gray-400">Showing {{ filteredProducts().length }} of {{ productService.total() }}</span>
+          <span class="text-sm text-gray-400">Showing {{ filteredProducts().length }} of {{ productService.total()
+            }}</span>
           <div class="flex items-center gap-3">
-            <nz-select style="width:160px;" [(ngModel)]="sortOption" (ngModelChange)="applyFilters()" nzPlaceHolder="Sort by">
+            <nz-select style="width:160px;" [(ngModel)]="sortOption" (ngModelChange)="applyFilters()"
+              nzPlaceHolder="Sort by">
               <nz-option nzValue="default" nzLabel="Default"></nz-option>
               <nz-option nzValue="price-asc" nzLabel="Price: Low to High"></nz-option>
               <nz-option nzValue="price-desc" nzLabel="Price: High to Low"></nz-option>
@@ -61,13 +66,11 @@
             </nz-select>
             <div class="flex border border-gray-200 rounded-lg overflow-hidden h-[34.5px]">
               <button class="px-3 bg-white text-gray-400 hover:text-[#1a6b3c] transition-all"
-                      [class.active-toggle]="viewMode === 'grid'"
-                      (click)="viewMode = 'grid'" title="Grid view">
+                [class.active-toggle]="viewMode === 'grid'" (click)="viewMode = 'grid'" title="Grid view">
                 <span nz-icon nzType="appstore"></span>
               </button>
               <button class="px-3 bg-white text-gray-400 hover:text-[#1a6b3c] transition-all border-l border-gray-200"
-                      [class.active-toggle]="viewMode === 'list'"
-                      (click)="viewMode = 'list'" title="List view">
+                [class.active-toggle]="viewMode === 'list'" (click)="viewMode = 'list'" title="List view">
                 <span nz-icon nzType="unordered-list"></span>
               </button>
             </div>
@@ -76,143 +79,190 @@
 
         <!-- Initial Loading -->
         @if (productService.loading()) {
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-              @for (i of [1,2,3,4,5,6,7,8]; track i) {
-                <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm animate-pulse">
-                  <div class="h-60 bg-gray-100"></div>
-                  <div class="p-4 space-y-3">
-                    <div class="h-4 bg-gray-100 rounded w-3/4"></div>
-                    <div class="h-3 bg-gray-100 rounded w-1/2"></div>
-                    <div class="h-6 bg-gray-100 rounded w-1/3"></div>
-                  </div>
-                </div>
-              }
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          @for (i of [1,2,3,4,5,6,7,8]; track i) {
+          <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm animate-pulse">
+            <div class="h-60 bg-gray-100"></div>
+            <div class="p-4 space-y-3">
+              <div class="h-4 bg-gray-100 rounded w-3/4"></div>
+              <div class="h-3 bg-gray-100 rounded w-1/2"></div>
+              <div class="h-6 bg-gray-100 rounded w-1/3"></div>
             </div>
-        } @else if (filteredProducts().length === 0) {
-          <div class="flex flex-col items-center justify-center py-16 text-gray-400 text-center gap-3">
-            <span class="text-6xl">🔍</span>
-            <h3 class="text-xl font-semibold text-gray-700">No products found</h3>
-            <p>Try adjusting your filters</p>
           </div>
-        } @else {
-          <!-- PRODUCTS CONTAINER -->
-          <div class="space-y-8">
-            
-            <!-- GRID VIEW -->
-            @if (viewMode === 'grid') {
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                @for (product of filteredProducts(); track product._id) {
-                  <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow group flex flex-col h-[420px]">
-                    <div class="relative h-60 overflow-hidden bg-gray-50"
-                         (mouseenter)="onImageMouseEnter(product)"
-                         (mouseleave)="onImageMouseLeave(product)">
-                        <a [routerLink]="['/products', product._id]" class="block h-full w-full">
-                          @if (product.images && product.images.length > 0) {
-                            <img [src]="getCardImage(product)"
-                                 [alt]="product.name"
-                                 class="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
-                                 [class.opacity-90]="hoveredProduct === product._id"
-                                 loading="lazy">
-                            @if (product.images.length > 1 && hoveredProduct === product._id) {
-                                <div class="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 z-10 pointer-events-none">
-                                  @for (dot of getImageDotsCount(product); track dot) {
-                                    <span class="w-1.5 h-1.5 rounded-full transition-all duration-200"
-                                          [class]="(cardImageIndexes.get(product._id) ?? 0) === dot ? 'bg-white scale-125 shadow-sm' : 'bg-white/50'"></span>
-                                  }
-                                </div>
-                            }
-                          } @else {
-                            <div class="w-full h-full flex items-center justify-center text-5xl grayscale opacity-30">🧴</div>
-                          }
-                        </a>
-                        @if (product.isFeatured) {
-                            <span class="absolute top-2 left-2 bg-yellow-400 text-[#1a1a2e] text-[0.62rem] font-bold px-2 py-0.5 rounded-full shadow-sm uppercase tracking-tighter">Featured</span>
-                        }
-                        @if (product.stock === 0) {
-                            <span class="absolute top-2 right-2 bg-black/60 text-white text-[0.62rem] font-bold px-2 py-0.5 rounded-full backdrop-blur-sm">Out of Stock</span>
-                        }
-                    </div>
-
-                    <div class="p-4 flex flex-col flex-grow gap-1">
-                      <span class="text-[0.65rem] font-bold uppercase tracking-widest text-[#2d9f5e]">{{ getCatName(product) }}</span>
-                      <a [routerLink]="['/products', product._id]" class="text-sm font-bold text-[#1a1a2e] hover:text-[#1a6b3c] transition-colors line-clamp-2 leading-tight min-h-[2.5rem]">{{ product.name }}</a>
-                      <p class="text-[0.78rem] text-gray-400 line-clamp-2 mb-1 flex-grow">{{ product.desc }}</p>
-                      
-                      <div class="flex items-center justify-between mt-auto pt-3 gap-2 border-t border-gray-50">
-                        <span class="text-lg font-extrabold text-[#1a6b3c]">{{ formatPrice(product.price) }}</span>
-                        <button (click)="addToCart(product)" 
-                                [disabled]="product.stock === 0"
-                                class="flex items-center gap-1.5 bg-[#1a6b3c] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all hover:bg-[#0d3d22] disabled:opacity-50 disabled:cursor-not-allowed shadow-sm active:scale-95 leading-none">
-                          <span nz-icon nzType="shopping-cart" class="text-sm"></span>
-                          {{ cart.isInCart(product._id) ? 'In Cart' : 'Add' }}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                }
-              </div>
-            }
-
-            <!-- LIST VIEW -->
-            @if (viewMode === 'list') {
-              <div class="space-y-4">
-                @for (product of filteredProducts(); track product._id) {
-                  <div class="bg-white rounded-xl border border-gray-200 p-4 flex gap-5 shadow-sm group hover:shadow-md transition-shadow h-[160px]">
-                      <div class="relative w-40 h-full rounded-lg overflow-hidden bg-gray-50 flex-shrink-0"
-                           (mouseenter)="onImageMouseEnter(product)"
-                           (mouseleave)="onImageMouseLeave(product)">
-                        <a [routerLink]="['/products', product._id]">
-                          @if (product.images && product.images.length > 0) {
-                            <img [src]="getCardImage(product)" [alt]="product.name" class="w-full h-full object-cover">
-                          } @else {
-                            <div class="w-full h-full flex items-center justify-center text-4xl opacity-20 grayscale">🧴</div>
-                          }
-                        </a>
-                      </div>
-
-                      <div class="flex flex-col flex-grow gap-1 min-w-0 py-1">
-                        <span class="text-[0.6rem] font-bold tracking-widest uppercase text-[#2d9f5e]">{{ getCatName(product) }}</span>
-                        <a [routerLink]="['/products', product._id]" class="text-lg font-bold text-[#1a1a2e] hover:text-[#1a6b3c] truncate">{{ product.name }}</a>
-                        <p class="text-sm text-gray-400 line-clamp-2">{{ product.desc }}</p>
-                        @if (product.tags && product.tags.length > 0) {
-                           <div class="flex flex-wrap gap-1.5 mt-auto">
-                            @for (tag of product.tags.slice(0,3); track tag) {
-                              <span class="bg-gray-100 text-gray-500 text-[0.65rem] px-2.5 py-1 rounded-full font-medium">{{ tag }}</span>
-                            }
-                           </div>
-                        }
-                      </div>
-
-                      <div class="flex flex-col items-end justify-between min-w-[140px] pl-4 border-l border-gray-100 py-1">
-                        <span class="text-2xl font-black text-[#1a6b3c]">{{ formatPrice(product.price) }}</span>
-                        <div class="flex flex-col items-end gap-2 w-full">
-                          <span class="text-[0.68rem] font-bold" [class]="product.stock === 0 ? 'text-red-500' : (product.stock <= 10 ? 'text-orange-500' : 'text-green-600')">
-                            {{ product.stock === 0 ? 'Out of Stock' : (product.stock <= 10 ? 'Only ' + product.stock + ' left' : 'In Stock') }}
-                          </span>
-                          <button (click)="addToCart(product)"
-                                  [disabled]="product.stock === 0"
-                                  class="w-full flex items-center justify-center gap-2 bg-[#1a6b3c] text-white py-2 rounded-lg text-xs font-bold transition-all hover:bg-[#0d3d22] disabled:opacity-40 shadow-sm active:scale-95 leading-none px-4">
-                            <span nz-icon nzType="shopping-cart"></span>
-                            {{ cart.isInCart(product._id) ? 'In Cart' : 'Add to Cart' }}
-                          </button>
-                        </div>
-                      </div>
-                  </div>
-                }
-              </div>
-            }
-          </div>
-        }
-
-        <!-- Infinite Scroll Sentinel -->
-        <div #scrollSentinel class="h-20 flex items-center justify-center gap-3 text-gray-400 py-10">
-          @if (productService.loadingMore()) {
-            <div class="w-5 h-5 border-2 border-gray-200 border-t-[#1a6b3c] rounded-full animate-spin"></div>
-            <span class="text-sm">Loading more products...</span>
-          } @else if (!productService.hasMore() && filteredProducts().length > 0) {
-            <p class="text-sm">✓ You've seen all {{ productService.total() }} products</p>
           }
         </div>
+        } @else if (filteredProducts().length === 0) {
+        <div class="flex flex-col items-center justify-center py-16 text-gray-400 text-center gap-3">
+          <span class="text-6xl">🔍</span>
+          <h3 class="text-xl font-semibold text-gray-700">No products found</h3>
+          <p>Try adjusting your filters</p>
+        </div>
+        } @else {
+        <!-- PRODUCTS CONTAINER -->
+        <vs-viewport [items]="filteredProducts()" [mode]="viewMode" [gridRowHeight]="460" [listItemHeight]="192"
+          [itemMinWidth]="280" (loadMore)="onLoadMore()">
+
+          <!-- ══ GRID CARD TEMPLATE ══ -->
+          <ng-template vsGridItem let-product>
+            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm
+                              hover:shadow-md transition-shadow group flex flex-col h-[420px]">
+
+
+              <div class="relative h-60 overflow-hidden bg-gray-50" (mouseenter)="onImageMouseEnter(product)"
+                (mouseleave)="onImageMouseLeave(product)">
+
+                <a [routerLink]="['/products', product._id]" class="block h-full w-full">
+
+                  @if (product.images && product.images.length > 0) {
+
+                  <!-- ── Slider Strip ─────────────────────────────────────────
+           Width = N × 100% of container so each slot = exactly container width.
+           translateX(-(idx/N)×100%) shifts to show the active image.
+           will-change: transform → promoted to GPU compositor layer.
+      ─────────────────────────────────────────────────────────── -->
+                  <div class="flex h-full will-change-transform" [style.width.%]="product.images.length * 100"
+                    [style.transform]="getSliderTransform(product)" [style.transition]="getSliderTransition(product)">
+
+                    @for (img of product.images; track img; let i = $index) {
+                    <img [attr.src]="getImageSrc(product, i)" [alt]="product.name"
+                      class="h-full object-cover flex-shrink-0" [style.width.%]="100 / product.images.length"
+                      [attr.loading]="i === 0 ? 'lazy' : 'eager'">
+                    <!-- index 0 → native browser lazy load (below fold)  -->
+                    <!-- index 1+ → eager because we control when src is set -->
+                    }
+
+                  </div>
+
+                  } @else {
+                  <div class="w-full h-full flex items-center justify-center text-5xl grayscale opacity-30">🧴</div>
+                  }
+
+                </a>
+
+                <!-- Dot indicators -->
+                @if (product.images?.length > 1 && hoveredProduct === product._id) {
+                <div class="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 z-10 pointer-events-none">
+                  @for (dot of getImageDotsCount(product); track dot) {
+                  <span class="w-1.5 h-1.5 rounded-full transition-all duration-200" [class]="(cardImageIndexes.get(product._id) ?? 0) === dot
+                ? 'bg-white scale-125 shadow-sm'
+                : 'bg-white/50'">
+                  </span>
+                  }
+                </div>
+                }
+
+                <!-- Badges (unchanged) -->
+                @if (product.isFeatured) {
+                <span class="absolute top-2 left-2 bg-yellow-400 text-[#1a1a2e] text-[0.62rem]
+                 font-bold px-2 py-0.5 rounded-full shadow-sm uppercase tracking-tighter">Featured</span>
+                }
+                @if (product.stock === 0) {
+                <span class="absolute top-2 right-2 bg-black/60 text-white text-[0.62rem]
+                 font-bold px-2 py-0.5 rounded-full backdrop-blur-sm">Out of Stock</span>
+                }
+
+              </div>
+
+
+              <div class="p-4 flex flex-col flex-grow gap-1">
+                <span class="text-[0.65rem] font-bold uppercase tracking-widest text-[#2d9f5e]">{{ getCatName(product)
+                  }}</span>
+                <a [routerLink]="['/products', product._id]"
+                  class="text-sm font-bold text-[#1a1a2e] hover:text-[#1a6b3c] transition-colors line-clamp-2 leading-tight min-h-[2.5rem]">
+                  {{ product.name }}
+                </a>
+                <p class="text-[0.78rem] text-gray-400 line-clamp-2 mb-1 flex-grow">{{ product.desc }}</p>
+                <div class="flex items-center justify-between mt-auto pt-3 gap-2 border-t border-gray-50">
+                  <span class="text-lg font-extrabold text-[#1a6b3c]">{{ formatPrice(product.price) }}</span>
+                  <button (click)="addToCart(product)" [disabled]="product.stock === 0" class="flex items-center gap-1.5 bg-[#1a6b3c] text-white px-3 py-1.5 rounded-lg
+                                      text-xs font-bold transition-all hover:bg-[#0d3d22] disabled:opacity-50
+                                      disabled:cursor-not-allowed shadow-sm active:scale-95 leading-none">
+                    <span nz-icon nzType="shopping-cart" class="text-sm"></span>
+                    {{ cart.isInCart(product._id) ? 'In Cart' : 'Add' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+
+          <!-- ══ LIST CARD TEMPLATE ══ -->
+          <ng-template vsListItem let-product>
+            <div class="bg-white rounded-xl border border-gray-200 p-4 flex gap-5 shadow-sm
+                              group hover:shadow-md transition-shadow h-[160px]">
+
+              <div class="relative w-40 h-full rounded-lg overflow-hidden bg-gray-50 flex-shrink-0"
+                (mouseenter)="onImageMouseEnter(product)" (mouseleave)="onImageMouseLeave(product)">
+
+                <a [routerLink]="['/products', product._id]" class="block h-full w-full">
+                  @if (product.images && product.images.length > 0) {
+
+                  <div class="flex h-full will-change-transform" [style.width.%]="product.images.length * 100"
+                    [style.transform]="getSliderTransform(product)" [style.transition]="getSliderTransition(product)">
+
+                    @for (img of product.images; track img; let i = $index) {
+                    <img [attr.src]="getImageSrc(product, i)" [alt]="product.name"
+                      class="h-full object-cover flex-shrink-0" [style.width.%]="100 / product.images.length"
+                      [attr.loading]="i === 0 ? 'lazy' : 'eager'">
+                    }
+
+                  </div>
+
+                  } @else {
+                  <div class="w-full h-full flex items-center justify-center text-4xl opacity-20 grayscale">🧴</div>
+                  }
+                </a>
+
+              </div>
+
+
+              <div class="flex flex-col flex-grow gap-1 min-w-0 py-1">
+                <span class="text-[0.6rem] font-bold tracking-widest uppercase text-[#2d9f5e]">{{ getCatName(product)
+                  }}</span>
+                <a [routerLink]="['/products', product._id]"
+                  class="text-lg font-bold text-[#1a1a2e] hover:text-[#1a6b3c] truncate">{{ product.name }}</a>
+                <p class="text-sm text-gray-400 line-clamp-2">{{ product.desc }}</p>
+                @if (product.tags && product.tags.length > 0) {
+                <div class="flex flex-wrap gap-1.5 mt-auto">
+                  @for (tag of product.tags.slice(0,3); track tag) {
+                  <span class="bg-gray-100 text-gray-500 text-[0.65rem] px-2.5 py-1 rounded-full font-medium">{{ tag
+                    }}</span>
+                  }
+                </div>
+                }
+              </div>
+
+              <div class="flex flex-col items-end justify-between min-w-[140px] pl-4 border-l border-gray-100 py-1">
+                <span class="text-2xl font-black text-[#1a6b3c]">{{ formatPrice(product.price) }}</span>
+                <div class="flex flex-col items-end gap-2 w-full">
+                  <span class="text-[0.68rem] font-bold"
+                    [class]="product.stock === 0 ? 'text-red-500' : (product.stock <= 10 ? 'text-orange-500' : 'text-green-600')">
+                    {{ product.stock === 0 ? 'Out of Stock' : (product.stock <= 10 ? 'Only ' + product.stock + ' left'
+                      : 'In Stock' ) }} </span>
+                      <button (click)="addToCart(product)" [disabled]="product.stock === 0" class="w-full flex items-center justify-center gap-2 bg-[#1a6b3c] text-white py-2
+                                      rounded-lg text-xs font-bold transition-all hover:bg-[#0d3d22] disabled:opacity-40
+                                      shadow-sm active:scale-95 leading-none px-4">
+                        <span nz-icon nzType="shopping-cart"></span>
+                        {{ cart.isInCart(product._id) ? 'In Cart' : 'Add to Cart' }}
+                      </button>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+
+        </vs-viewport>
+
+        <!-- Loading more indicator (shown outside the viewport) -->
+        @if (productService.loadingMore()) {
+        <div class="flex items-center justify-center gap-3 text-gray-400 py-8">
+          <div class="w-5 h-5 border-2 border-gray-200 border-t-[#1a6b3c] rounded-full animate-spin"></div>
+          <span class="text-sm">Loading more products...</span>
+        </div>
+        } @else if (!productService.hasMore() && filteredProducts().length > 0) {
+        <p class="text-center text-sm text-gray-400 py-6">
+          ✓ You've seen all {{ productService.total() }} products
+        </p>
+        }
+        }
       </main>
     </div>
   </div>
