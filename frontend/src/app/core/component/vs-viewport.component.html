@@ -1,0 +1,45 @@
+<!-- ── GRID MODE ── -->
+@if (mode === 'grid' && gridItemDir) {
+  <cdk-virtual-scroll-viewport
+    #gridVp
+    [itemSize]="gridRowHeight"
+    [style.height]="vsHeight"
+    [minBufferPx]="gridRowHeight * 2"
+    [maxBufferPx]="gridRowHeight * 4"
+    class="w-full">
+
+    <div
+      *cdkVirtualFor="let row of gridRows; trackBy: trackByRow; templateCacheSize: 20"
+      class="grid gap-5 mb-5"
+      [style.gridTemplateColumns]="gridColStyle()">
+
+      @for (item of row; track item._id ?? $index) {
+        <ng-container
+          *ngTemplateOutlet="gridItemDir!.template; context: { $implicit: item }">
+        </ng-container>
+      }
+    </div>
+
+  </cdk-virtual-scroll-viewport>
+}
+
+<!-- ── LIST MODE ── -->
+@if (mode === 'list' && listItemDir) {
+  <cdk-virtual-scroll-viewport
+    #listVp
+    [itemSize]="listItemHeight"
+    [style.height]="vsHeight"
+    [minBufferPx]="listItemHeight * 3"
+    [maxBufferPx]="listItemHeight * 6"
+    class="w-full">
+
+    <div
+      *cdkVirtualFor="let item of items; trackBy: trackByItem; templateCacheSize: 30"
+      class="mb-4">
+      <ng-container
+        *ngTemplateOutlet="listItemDir!.template; context: { $implicit: item }">
+      </ng-container>
+    </div>
+
+  </cdk-virtual-scroll-viewport>
+}
