@@ -1,8 +1,15 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 const BASE_URL = 'http://localhost:3000/api/v1';
+
+export interface ApiRequestOptions {
+    params?: HttpParams;
+    headers?: HttpHeaders;
+}
+
+
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
@@ -15,8 +22,16 @@ export class ApiService {
             : new HttpHeaders();
     }
 
-    get<T>(path: string): Observable<T> {
-        return this.http.get<T>(`${BASE_URL}${path}`, { headers: this.getHeaders() });
+
+    get<T>(path: string, options: ApiRequestOptions = {}): Observable<T> {
+        const headers = options.headers
+            ? options.headers
+            : this.getHeaders();
+
+        return this.http.get<T>(`${BASE_URL}${path}`, {
+            headers,
+            params: options.params,
+        });
     }
 
     post<T>(path: string, body: any): Observable<T> {

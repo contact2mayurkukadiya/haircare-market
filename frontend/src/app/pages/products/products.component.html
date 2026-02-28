@@ -44,7 +44,7 @@
         <div>
           <h3 class="text-[0.82rem] font-bold uppercase tracking-wider text-gray-400 mb-3">Availability</h3>
           <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
-            <input type="checkbox" [(ngModel)]="inStockOnly" (ngModelChange)="applyFilters()" class="accent-[#1a6b3c]">
+            <input type="checkbox" [(ngModel)]="inStockOnly" (change)="toggleInStockOnly()" class="accent-[#1a6b3c]">
             In Stock Only
           </label>
         </div>
@@ -56,8 +56,32 @@
         <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
           <span class="text-sm text-gray-400">Showing {{ filteredProducts().length }} of {{ productService.total()
             }}</span>
+
+          <!-- Middle: search box -->
+          <div class="flex-1 flex justify-center md:justify-start">
+            <div class="flex items-center gap-2 w-full max-w-md">
+              <!-- Search input -->
+              <div class="relative flex-1">
+                <span class="absolute inset-y-0 left-3 flex items-center text-gray-400 text-sm pointer-events-none">
+                  <span nz-icon nzType="search"></span>
+                </span>
+                <input type="text" class="w-full border border-gray-200 rounded-lg pl-9 pr-3 py-2 text-sm
+                 text-gray-700 placeholder:text-gray-400 focus:outline-none
+                 focus:ring-1 focus:ring-1a6b3c focus:border-1a6b3c bg-white" placeholder="Search products..."
+                  [ngModel]="searchTerm()" (ngModelChange)="onSearchChange($event)" />
+              </div>
+
+              <!-- Reset filters button -->
+              <button type="button" *ngIf="hasActiveFilters()" class="px-3 py-2 text-xs font-semibold border border-gray-300 rounded-lg
+               bg-white text-gray-600 hover:bg-gray-100 hover:text-1a1a2e
+               transition-colors whitespace-nowrap" (click)="resetFilters()">
+                Reset filters
+              </button>
+            </div>
+          </div>
+
           <div class="flex items-center gap-3">
-            <nz-select style="width:160px;" [(ngModel)]="sortOption" (ngModelChange)="applyFilters()"
+            <nz-select style="width:160px;" [(ngModel)]="sortOption" (ngModelChange)="onSortChange($event)"
               nzPlaceHolder="Sort by">
               <nz-option nzValue="default" nzLabel="Default"></nz-option>
               <nz-option nzValue="price-asc" nzLabel="Price: Low to High"></nz-option>

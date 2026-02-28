@@ -1,14 +1,6 @@
 // prettier-ignore
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { Model } from 'mongoose';
-
-export interface PaginatedResult<T> {
-  data: T[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
+import { Model, Types } from 'mongoose';
 import { unlink } from 'fs/promises';
 import { join } from 'path';
 
@@ -17,6 +9,24 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { IProduct } from 'src/interfaces';
+
+export interface PaginatedResult<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface ProductFilters {
+  category?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  inStock?: boolean;
+  search?: string;
+  sort?: 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc';
+}
+
 
 const UPLOADS_DIR = join(process.cwd(), 'uploads', 'products');
 
@@ -50,6 +60,114 @@ export class ProductsService {
       totalPages: Math.ceil(total / limit),
     };
   }
+
+  async findAllWithFilters(
+    page = 1,
+    limit = 12,
+    filters: ProductFilters = {},
+  ): Promise<PaginatedResult<IProduct>> {
+    const skip = (page - 1) * limit;
+
+    const pipeline: any[] = [];
+
+    // base filter: only active products for public listing
+    pipeline.push({ $match: { isActive: true } });
+
+    // category filter (expects category ObjectId as string)
+    if (filters.category) {
+      pipeline.push({
+        $match: {
+          category: filters.category,
+        },
+      });
+    }
+
+    // price range filter
+    if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
+      const priceCond: any = {};
+      if (filters.minPrice !== undefined) priceCond.$gte = filters.minPrice;
+      if (filters.maxPrice !== undefined) priceCond.$lte = filters.maxPrice;
+      pipeline.push({ $match: { price: priceCond } });
+    }
+
+    // in-stock filter
+    if (filters.inStock === true) {
+      pipeline.push({ $match: { stock: { $gt: 0 } } });
+    } else if (filters.inStock === false) {
+      pipeline.push({ $match: { stock: { $lte: 0 } } });
+    }
+
+    // text search on name/desc (case-insensitive)
+    if (filters.search && filters.search.trim().length > 0) {
+      const regex = new RegExp(filters.search.trim(), 'i');
+      pipeline.push({
+        $match: {
+          $or: [{ name: regex }, { desc: regex }],
+        },
+      });
+    }
+
+    // lookup category to mimic populate('category')
+    pipeline.push({
+      $lookup: {
+        from: 'categories',
+        localField: 'category',
+        foreignField: '_id',
+        as: 'category',
+      },
+    });
+    pipeline.push({
+      $unwind: {
+        path: '$category',
+        preserveNullAndEmptyArrays: true,
+      },
+    });
+
+    // sort
+    const sortStage: any = {};
+    switch (filters.sort) {
+      case 'price-asc':
+        sortStage.price = 1;
+        break;
+      case 'price-desc':
+        sortStage.price = -1;
+        break;
+      case 'name-asc':
+        sortStage.name = 1;
+        break;
+      case 'name-desc':
+        sortStage.name = -1;
+        break;
+      default:
+        sortStage.createdAt = -1;
+    }
+    pipeline.push({ $sort: sortStage });
+
+    // pagination + total (using $facet)
+    pipeline.push({
+      $facet: {
+        data: [{ $skip: skip }, { $limit: limit }],
+        totalCount: [{ $count: 'count' }],
+      },
+    });
+
+    const result = await this.productsModel.aggregate(pipeline).exec();
+    const aggResult = result[0] || { data: [], totalCount: [] };
+
+    const total = aggResult.totalCount[0]?.count || 0;
+    const products = (aggResult.data as any[]).map(p => this.mapProduct(p)) as IProduct[];
+
+    return {
+      data: products,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit) || 1,
+    };
+  }
+
+
+
 
   async findOne(productId: string): Promise<IProduct> {
     const product = await this.productsModel.findById(productId).populate('category').lean();

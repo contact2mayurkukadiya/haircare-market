@@ -13,11 +13,28 @@ export class ProductsController {
   @ApiOperation({ summary: 'Get all products (paginated)' })
   @ApiResponse({ status: 200, description: 'Returns paginated products.' })
   @Get()
-  findAll(
+  async findAll(
     @Query('page') page = 1,
-    @Query('limit') limit = 12,
+    @Query('limit') limit = 24,
+    @Query('category') category?: string,
+    @Query('minPrice') minPrice?: string,
+    @Query('maxPrice') maxPrice?: string,
+    @Query('inStock') inStock?: string,
+    @Query('search') search?: string,
+    @Query('sort') sort?: 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc',
   ) {
-    return this.productsService.findAll(+page, +limit);
+    return this.productsService.findAllWithFilters(
+      +page,
+      +limit,
+      {
+        category,
+        minPrice: minPrice ? +minPrice : undefined,
+        maxPrice: maxPrice ? +maxPrice : undefined,
+        inStock: inStock === 'true' ? true : inStock === 'false' ? false : undefined,
+        search,
+        sort
+      }
+    );
   }
 
   @ApiOperation({ summary: 'Get a specific product by ID' })

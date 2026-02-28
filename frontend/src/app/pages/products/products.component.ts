@@ -1,10 +1,11 @@
 import {
-  Component, OnInit, OnDestroy, inject, signal, computed, AfterViewInit
+  Component, OnInit, OnDestroy, inject, signal, computed, AfterViewInit,
+  WritableSignal
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { ProductService, Product, Category } from '../../core/services/product.service';
+import { ProductService, Product, Category, ProductQueryFilters } from '../../core/services/product.service';
 import { CategoryService } from '../../core/services/category.service';
 import { CartService } from '../../core/services/cart.service';
 import { NzIconModule } from 'ng-zorro-antd/icon';
@@ -12,6 +13,7 @@ import { NzSelectModule } from 'ng-zorro-antd/select';
 import { VsViewportComponent } from '../../core/component/vs-viewport.component';
 import { VsGridItemDirective } from '../../core/directive/vs-grid-item.directive';
 import { VsListItemDirective } from '../../core/directive/vs-list-item.directive';
+import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 
 type ViewMode = 'grid' | 'list';
 
@@ -32,11 +34,14 @@ export class ProductsComponent implements OnInit, OnDestroy {
   cart = inject(CartService);
   private route = inject(ActivatedRoute);
 
-  viewMode: ViewMode = 'grid';
-  sortOption = 'default';
-  inStockOnly = false;
   selectedCat = signal<string | null>(null);
   selectedRange = signal<string | null>(null);
+  inStockOnly: WritableSignal<boolean> = signal<boolean>(false);
+  sortOption = signal<'price-asc' | 'price-desc' | 'name-asc' | 'name-desc' | null>(null);
+  searchTerm = signal<string>('');
+  private searchInput$ = new Subject<string>();
+  private destroy$ = new Subject<void>();
+  viewMode: ViewMode = 'grid';
 
   hoveredProduct: string | null = null;
   // Tracks which products have had their extra images unlocked (src set)
@@ -56,61 +61,116 @@ export class ProductsComponent implements OnInit, OnDestroy {
     { label: '$50 - $100', min: 50, max: 100 },
     { label: 'Over $100', min: 100, max: Infinity },
   ];
-  private selectedPriceRange: { min: number; max: number } | null = null;
+  selectedPriceRange = signal<{ label: string; min: number; max: number } | null>(null);
 
-  filteredProducts = computed(() => {
-    let list = this.productService.products().filter(p => p.isActive);
-    const cat = this.selectedCat();
-    if (cat) {
-      list = list.filter(p => {
-        if (p.category && typeof p.category === 'object') return (p.category as Category)._id === cat;
-        return p.category === cat;
-      });
-    }
-    if (this.selectedPriceRange) {
-      const { min, max } = this.selectedPriceRange;
-      list = list.filter(p => p.price >= min && p.price <= max);
-    }
-    if (this.inStockOnly) list = list.filter(p => p.stock > 0);
-    switch (this.sortOption) {
-      case 'price-asc': return [...list].sort((a, b) => a.price - b.price);
-      case 'price-desc': return [...list].sort((a, b) => b.price - a.price);
-      case 'name-asc': return [...list].sort((a, b) => a.name.localeCompare(b.name));
-      default: return list;
-    }
+  filteredProducts = computed(() => this.productService.products());
+  hasActiveFilters = computed(() => {
+    const hasCategory = !!this.selectedCat();
+    const hasPrice = !!this.selectedPriceRange();
+    const hasStock = this.inStockOnly();
+    const hasSort = !!this.sortOption();
+    const hasSearch = this.searchTerm().trim().length > 0;
+
+    return hasCategory || hasPrice || hasStock || hasSort || hasSearch;
   });
 
+
+  private buildFilterPayload(): ProductQueryFilters {
+    let minPrice: number | null = null;
+    let maxPrice: number | null = null;
+    if (this.selectedPriceRange()) {
+      minPrice = this.selectedPriceRange()!.min;
+      maxPrice = this.selectedPriceRange()!.max === Infinity ? null : this.selectedPriceRange()!.max;
+    }
+
+    return {
+      category: this.selectedCat(),
+      minPrice,
+      maxPrice,
+      inStock: this.inStockOnly() ? true : null,
+      search: this.searchTerm().trim() || null,
+      sort: this.sortOption(),
+    };
+  }
+
+
   ngOnInit(): void {
-    this.productService.loadAll(1, this.PAGE_SIZE).subscribe();
-    this.categoryService.loadAll().subscribe();
     this.route.queryParams.subscribe(params => {
       if (params['cat']) this.selectedCat.set(params['cat']);
+      this.productService.loadAll(1, this.PAGE_SIZE, this.buildFilterPayload()).subscribe();
     });
+
+    this.categoryService.loadAll().subscribe();
+
+    this.searchInput$
+      .pipe(
+        debounceTime(400),
+        distinctUntilChanged(),
+      )
+      .subscribe((term) => {
+        this.searchTerm.set(term);
+        this.productService
+          .loadAll(1, this.PAGE_SIZE, this.buildFilterPayload())
+          .subscribe();
+      });
   }
 
   /** Called by vs-viewport's (loadMore) output */
   onLoadMore(): void {
     if (this.productService.hasMore() && !this.productService.loadingMore()) {
-      this.productService.loadMore(this.PAGE_SIZE).subscribe();
+      this.productService.loadMore(this.PAGE_SIZE, this.buildFilterPayload()).subscribe();
     }
   }
 
   selectCat(id: string | null): void {
     this.selectedCat.set(id);
-    this.productService.loadAll(1, this.PAGE_SIZE).subscribe();
+    this.productService.loadAll(1, this.PAGE_SIZE, this.buildFilterPayload()).subscribe();
   }
+
 
   selectRange(range: { label: string; min: number; max: number }): void {
     if (this.selectedRange() === range.label) {
       this.selectedRange.set(null);
-      this.selectedPriceRange = null;
+      this.selectedPriceRange.set(null);
     } else {
       this.selectedRange.set(range.label);
-      this.selectedPriceRange = range;
+      this.selectedPriceRange.set(range);
     }
+    this.productService.loadAll(1, this.PAGE_SIZE, this.buildFilterPayload()).subscribe();
   }
 
-  applyFilters(): void { }
+  toggleInStockOnly(): void {
+    this.productService.loadAll(1, this.PAGE_SIZE, this.buildFilterPayload()).subscribe();
+  }
+
+  onSortChange(value: 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc' | null): void {
+    this.sortOption.set(value);
+    this.productService.loadAll(1, this.PAGE_SIZE, this.buildFilterPayload()).subscribe();
+  }
+
+  onSearchChange(value: string): void {
+    this.searchInput$.next(value);
+  }
+
+
+  applyFilters(): void {
+    // if you want a dedicated "Apply" button, call this
+    this.productService.loadAll(1, this.PAGE_SIZE, this.buildFilterPayload()).subscribe();
+  }
+
+  resetFilters(): void {
+    // clear UI state
+    this.selectedCat.set(null);
+    this.selectedRange.set(null);
+    this.selectedPriceRange.set(null);
+    this.inStockOnly.set(false);
+    this.sortOption.set(null);
+    this.searchTerm.set('');
+
+    // reload first page with no filters
+    this.productService.loadAll(1, this.PAGE_SIZE, this.buildFilterPayload()).subscribe();
+  }
+
 
   getCatName(product: Product): string {
     if (product.category && typeof product.category === 'object')
@@ -201,5 +261,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.hoverIntervals.forEach(clearInterval);
+    this.destroy$.next();
+    this.destroy$.complete();
+
   }
 }

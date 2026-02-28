@@ -2,6 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { ApiService } from './api.service';
 import { tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
+import { HttpParams } from '@angular/common/http';
 
 export interface Category {
     _id: string;
@@ -31,6 +32,16 @@ export interface PaginatedProducts {
     totalPages: number;
 }
 
+export interface ProductQueryFilters {
+    category?: string | null;
+    minPrice?: number | null;
+    maxPrice?: number | null;
+    inStock?: boolean | null;
+    search?: string | null;
+    sort?: 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc' | null;
+}
+
+
 @Injectable({ providedIn: 'root' })
 export class ProductService {
     private api = inject(ApiService);
@@ -59,10 +70,34 @@ export class ProductService {
         return product.category as string ?? '';
     }
 
+    private buildParams(
+        page: number,
+        limit: number,
+        filters?: ProductQueryFilters,
+    ): HttpParams {
+        let params = new HttpParams()
+            .set('page', page)
+            .set('limit', limit);
+
+        if (filters?.category) params = params.set('category', filters.category);
+        if (filters?.minPrice != null) params = params.set('minPrice', String(filters.minPrice));
+        if (filters?.maxPrice != null && filters.maxPrice !== Infinity) {
+            params = params.set('maxPrice', String(filters.maxPrice));
+        }
+        if (filters?.inStock != null) params = params.set('inStock', String(filters.inStock));
+        if (filters?.search) params = params.set('search', filters.search.trim());
+        if (filters?.sort) params = params.set('sort', filters.sort);
+
+        return params;
+    }
+
+
     /** Initial load — resets the list */
-    loadAll(page = 1, limit = 12): Observable<PaginatedProducts> {
+    loadAll(page = 1, limit = 12, filters?: ProductQueryFilters): Observable<PaginatedProducts> {
         this._loading.set(true);
-        return this.api.get<PaginatedProducts>(`/products?page=${page}&limit=${limit}`).pipe(
+        const params = this.buildParams(page, limit, filters);
+
+        return this.api.get<PaginatedProducts>('/products', { params }).pipe(
             tap({
                 next: (res) => {
                     this._products.set(res.data);
@@ -72,19 +107,24 @@ export class ProductService {
                     this._loading.set(false);
                 },
                 error: () => this._loading.set(false),
-            })
+            }),
         );
     }
 
+
     /** Load next page and append results */
-    loadMore(limit = 12): Observable<PaginatedProducts> {
+    loadMore(limit = 12, filters?: ProductQueryFilters): Observable<PaginatedProducts> {
         const nextPage = this._currentPage() + 1;
         this._loadingMore.set(true);
-        return this.api.get<PaginatedProducts>(`/products?page=${nextPage}&limit=${limit}`).pipe(
+        const params = this.buildParams(nextPage, limit, filters);
+
+        return this.api.get<PaginatedProducts>('/products', { params }).pipe(
             tap({
                 next: (res) => {
                     this._products.update(existing => {
-                        const newItems = res.data.filter(newItem => !existing.some(oldItem => oldItem._id === newItem._id));
+                        const newItems = res.data.filter(
+                            newItem => !existing.some(oldItem => oldItem._id === newItem._id),
+                        );
                         return [...existing, ...newItems];
                     });
                     this._currentPage.set(res.page);
@@ -93,9 +133,10 @@ export class ProductService {
                     this._loadingMore.set(false);
                 },
                 error: () => this._loadingMore.set(false),
-            })
+            }),
         );
     }
+
 
     loadById(id: string): Observable<Product> {
         this._loading.set(true);
