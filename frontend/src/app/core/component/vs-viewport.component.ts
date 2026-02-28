@@ -24,8 +24,8 @@ export class VsViewportComponent implements AfterViewInit, OnChanges, OnDestroy 
 
     @Input() items: any[] = [];
     @Input() mode: 'grid' | 'list' = 'grid';
-    @Input() gridRowHeight = 460;   // one grid ROW height (card + gap)
-    @Input() listItemHeight = 192;  // one list item height (card + gap)
+    @Input() gridRowHeight = 440;   // one grid ROW height (card + gap)
+    @Input() listItemHeight = 176;  // one list item height (card + gap)
     @Input() itemMinWidth = 280;    // min card width for auto-fill columns
 
     /** Emits when window scroll nears the bottom — connect to productService.loadMore() */
