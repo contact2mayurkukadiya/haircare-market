@@ -6,11 +6,12 @@ import { CategoryService } from '../../core/services/category.service';
 import { CartService } from '../../core/services/cart.service';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
+import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterLink, NzIconModule, NzSkeletonModule],
+  imports: [CommonModule, RouterLink, NzIconModule, NzSkeletonModule, ProductCardComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
@@ -47,20 +48,20 @@ export class HomeComponent implements OnInit {
     return '🌿';
   }
 
-  getCategoryName(product: Product): string {
-    if (product.category && typeof product.category === 'object') {
-      return (product.category as any).name ?? '';
-    }
-    return '';
-  }
+  // getCategoryName(product: Product): string {
+  //   if (product.category && typeof product.category === 'object') {
+  //     return (product.category as any).name ?? '';
+  //   }
+  //   return '';
+  // }
 
-  formatPrice(price: number): string {
-    return '$' + price.toFixed(2);
-  }
+  // formatPrice(price: number): string {
+  //   return '$' + price.toFixed(2);
+  // }
 
-  addToCart(product: Product, event: Event): void {
-    event.preventDefault();
-    event.stopPropagation();
-    this.cart.add(product);
-  }
+  // addToCart(product: Product, event: Event): void {
+  //   event.preventDefault();
+  //   event.stopPropagation();
+  //   this.cart.add(product);
+  // }
 }

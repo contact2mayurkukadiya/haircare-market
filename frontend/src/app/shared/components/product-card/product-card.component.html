@@ -1,0 +1,75 @@
+<div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm
+                hover:shadow-md transition-shadow group flex flex-col h-[420px]">
+
+    <!-- IMAGE SECTION -->
+    <div class="relative h-60 overflow-hidden bg-gray-50" (mouseenter)="onMouseEnter()" (mouseleave)="onMouseLeave()">
+
+        <a [routerLink]="['/products', product._id]" class="block h-full w-full">
+            @if (product.images && product.images.length > 0) {
+            <!-- Slider Container -->
+            <div class="flex h-full will-change-transform" [style.width.%]="product.images.length * 100"
+                [style.transform]="getSliderTransform()" [style.transition]="getSliderTransition()">
+
+                @for (img of product.images; track img; let i = $index) {
+                <img [attr.src]="getImageSrc(i)" [alt]="product.name" class="h-full object-cover flex-shrink-0"
+                    [style.width.%]="100 / product.images.length" [attr.loading]="i === 0 ? 'lazy' : 'eager'">
+                }
+            </div>
+            } @else {
+            <div class="w-full h-full flex items-center justify-center text-5xl grayscale opacity-30">🧴</div>
+            }
+        </a>
+
+        <!-- Dot Indicators (Visible on Hover) -->
+        @if (product.images.length > 1 && isHovered()) {
+        <div class="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 z-10 pointer-events-none">
+            @for (dot of dots; track dot) {
+            <span class="w-1.5 h-1.5 rounded-full transition-all duration-200"
+                [class]="currentIndex() === dot ? 'bg-white scale-125 shadow-sm' : 'bg-white/50'">
+            </span>
+            }
+        </div>
+        }
+
+        <!-- Badges -->
+        @if (product.isFeatured) {
+        <span class="absolute top-2 left-2 bg-yellow-400 text-[#1a1a2e] text-[0.62rem]
+                       font-bold px-2 py-0.5 rounded-full shadow-sm uppercase tracking-tighter">
+            Featured
+        </span>
+        }
+        @if (product.stock === 0) {
+        <span class="absolute top-2 right-2 bg-black/60 text-white text-[0.62rem]
+                       font-bold px-2 py-0.5 rounded-full backdrop-blur-sm">
+            Out of Stock
+        </span>
+        }
+    </div>
+
+    <!-- CONTENT SECTION -->
+    <div class="p-4 flex flex-col flex-grow gap-1">
+        <span class="text-[0.65rem] font-bold uppercase tracking-widest text-[#2d9f5e]">
+            {{ getCategoryName() }}
+        </span>
+
+        <a [routerLink]="['/products', product._id]"
+            class="text-sm font-bold text-[#1a1a2e] hover:text-[#1a6b3c] transition-colors line-clamp-2 leading-tight min-h-[2.5rem]">
+            {{ product.name }}
+        </a>
+
+        <p class="text-[0.78rem] text-gray-400 line-clamp-2 mb-1 flex-grow">
+            {{ product.desc }}
+        </p>
+
+        <div class="flex items-center justify-between mt-auto pt-3 gap-2 border-t border-gray-50">
+            <span class="text-lg font-extrabold text-[#1a6b3c]">{{ formatPrice(product.price) }}</span>
+
+            <button (click)="addToCart($event)" [disabled]="product.stock === 0" class="flex items-center gap-1.5 bg-[#1a6b3c] text-white px-3 py-1.5 rounded-lg
+                         text-xs font-bold transition-all hover:bg-[#0d3d22] disabled:opacity-50
+                         disabled:cursor-not-allowed shadow-sm active:scale-95 leading-none">
+                <span nz-icon nzType="shopping-cart" class="text-sm"></span>
+                {{ cart.isInCart(product._id) ? 'In Cart' : 'Add' }}
+            </button>
+        </div>
+    </div>
+</div>

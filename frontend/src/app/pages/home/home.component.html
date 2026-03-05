@@ -44,20 +44,20 @@
   <p class="section-subtitle">Find the perfect products for your hair type</p>
 
   @if (categoryService.categories().length === 0) {
-    <div class="loading-row">
-      @for (i of [1,2,3,4,5,6]; track i) {
-        <div class="skeleton" style="height:100px; border-radius:12px;"></div>
-      }
-    </div>
+  <div class="loading-row">
+    @for (i of [1,2,3,4,5,6]; track i) {
+    <div class="skeleton" style="height:100px; border-radius:12px;"></div>
+    }
+  </div>
   } @else {
-    <div class="categories-grid">
-      @for (cat of categoryService.categories(); track cat._id) {
-        <a routerLink="/products" [queryParams]="{cat: cat._id}" class="cat-card">
-          <span class="cat-icon">{{ getCatIcon(cat.name) }}</span>
-          <span class="cat-name">{{ cat.name }}</span>
-        </a>
-      }
-    </div>
+  <div class="categories-grid">
+    @for (cat of categoryService.categories(); track cat._id) {
+    <a routerLink="/products" [queryParams]="{cat: cat._id}" class="cat-card">
+      <span class="cat-icon">{{ getCatIcon(cat.name) }}</span>
+      <span class="cat-name">{{ cat.name }}</span>
+    </a>
+    }
+  </div>
   }
 </section>
 
@@ -72,22 +72,23 @@
   </div>
 
   @if (productService.loading()) {
-    <div class="products-grid">
-      @for (i of [1,2,3,4,5,6]; track i) {
-        <div class="skeleton-card card">
-          <div class="skeleton" style="height:220px;"></div>
-          <div style="padding:1rem; display:flex; flex-direction:column; gap:8px;">
-            <div class="skeleton" style="height:18px; width:80%;"></div>
-            <div class="skeleton" style="height:14px; width:60%;"></div>
-            <div class="skeleton" style="height:20px; width:40%;"></div>
-          </div>
-        </div>
-      }
+  <div class="products-grid">
+    @for (i of [1,2,3,4,5,6]; track i) {
+    <div class="skeleton-card card">
+      <div class="skeleton" style="height:220px;"></div>
+      <div style="padding:1rem; display:flex; flex-direction:column; gap:8px;">
+        <div class="skeleton" style="height:18px; width:80%;"></div>
+        <div class="skeleton" style="height:14px; width:60%;"></div>
+        <div class="skeleton" style="height:20px; width:40%;"></div>
+      </div>
     </div>
+    }
+  </div>
   } @else {
-    <div class="products-grid">
-      @for (product of featuredProducts(); track product._id) {
-        <div class="product-card card">
+  <div class="products-grid">
+    @for (product of featuredProducts(); track product._id) {
+    <app-product-card [product]="product"></app-product-card>
+    <!-- <div class="product-card card">
           <a [routerLink]="['/products', product._id]" class="product-img-wrap">
             @if (product.images && product.images.length > 0) {
               <img [src]="product.images[0]" [alt]="product.name" class="product-img" loading="lazy">
@@ -115,9 +116,9 @@
               </button>
             </div>
           </div>
-        </div>
-      }
-    </div>
+        </div> -->
+    }
+  </div>
   }
 </section>
 
@@ -127,11 +128,11 @@
     <h2 class="section-title" style="text-align:center; margin-bottom:2.5rem;">Why Choose Us?</h2>
     <div class="why-grid">
       @for (reason of reasons; track reason.icon) {
-        <div class="why-card">
-          <div class="why-icon">{{ reason.icon }}</div>
-          <h3>{{ reason.title }}</h3>
-          <p>{{ reason.desc }}</p>
-        </div>
+      <div class="why-card">
+        <div class="why-icon">{{ reason.icon }}</div>
+        <h3>{{ reason.title }}</h3>
+        <p>{{ reason.desc }}</p>
+      </div>
       }
     </div>
   </div>

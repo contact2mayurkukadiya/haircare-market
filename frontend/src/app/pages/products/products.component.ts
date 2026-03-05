@@ -14,6 +14,8 @@ import { VsViewportComponent } from '../../core/component/vs-viewport.component'
 import { VsGridItemDirective } from '../../core/directive/vs-grid-item.directive';
 import { VsListItemDirective } from '../../core/directive/vs-list-item.directive';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
+import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
+import { ProductListItemComponent } from '../../shared/components/product-list-item/product-list-item.component';
 
 type ViewMode = 'grid' | 'list';
 
@@ -23,7 +25,8 @@ type ViewMode = 'grid' | 'list';
   imports: [
     CommonModule, RouterLink, FormsModule,
     NzIconModule, NzSelectModule,
-    VsViewportComponent, VsGridItemDirective, VsListItemDirective  // ← add these
+    VsViewportComponent, VsGridItemDirective, VsListItemDirective,
+    ProductCardComponent, ProductListItemComponent
   ],
   templateUrl: './products.component.html',
   styleUrl: './products.component.scss',
@@ -43,14 +46,14 @@ export class ProductsComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   viewMode: ViewMode = 'grid';
 
-  hoveredProduct: string | null = null;
+  // hoveredProduct: string | null = null;
   // Tracks which products have had their extra images unlocked (src set)
-  private loadedProducts = new Set<string>();
+  // private loadedProducts = new Set<string>();
   // Current active slide index per product
-  cardImageIndexes = new Map<string, number>();
+  // cardImageIndexes = new Map<string, number>();
   // Products temporarily with transition:none (for instant reset to slide 0)
-  private noTransitionProducts = new Set<string>();
-  private hoverIntervals = new Map<string, ReturnType<typeof setInterval>>();
+  // private noTransitionProducts = new Set<string>();
+  // private hoverIntervals = new Map<string, ReturnType<typeof setInterval>>();
 
 
   private readonly PAGE_SIZE = 24; // Larger page since virtual scroll handles rendering
@@ -183,84 +186,84 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
   /* ── Hover Image Carousel (unchanged) ── */
 
-  getImageSrc(product: Product, index: number): string | null {
-    if (!product.images?.length) return null;
-    if (index === 0) return product.images[0];
-    return this.loadedProducts.has(product._id) ? product.images[index] : null;
-  }
+  // getImageSrc(product: Product, index: number): string | null {
+  //   if (!product.images?.length) return null;
+  //   if (index === 0) return product.images[0];
+  //   return this.loadedProducts.has(product._id) ? product.images[index] : null;
+  // }
   /** CSS transform to slide the strip to the active index */
-  getSliderTransform(product: Product): string {
-    const n = product.images?.length ?? 1;
-    if (n <= 1) return 'translateX(0)';
-    const idx = this.cardImageIndexes.get(product._id) ?? 0;
-    return `translateX(-${(idx / n) * 100}%)`;
-  }
+  // getSliderTransform(product: Product): string {
+  //   const n = product.images?.length ?? 1;
+  //   if (n <= 1) return 'translateX(0)';
+  //   const idx = this.cardImageIndexes.get(product._id) ?? 0;
+  //   return `translateX(-${(idx / n) * 100}%)`;
+  // }
 
   /** Transition is disabled momentarily when resetting from last → first */
-  getSliderTransition(product: Product): string {
-    return this.noTransitionProducts.has(product._id)
-      ? 'none'
-      : 'transform 0.45s ease-in-out';
-  }
+  // getSliderTransition(product: Product): string {
+  //   return this.noTransitionProducts.has(product._id)
+  //     ? 'none'
+  //     : 'transform 0.45s ease-in-out';
+  // }
 
-  onImageMouseEnter(product: Product): void {
-    if (!product.images || product.images.length <= 1) return;
+  // onImageMouseEnter(product: Product): void {
+  //   if (!product.images || product.images.length <= 1) return;
 
-    // ① Unlock src for all images of this product (browser fetches in background)
-    this.loadedProducts.add(product._id);
-    this.hoveredProduct = product._id;
+  //   // ① Unlock src for all images of this product (browser fetches in background)
+  //   this.loadedProducts.add(product._id);
+  //   this.hoveredProduct = product._id;
 
-    // ② Clear any lingering interval
-    const existing = this.hoverIntervals.get(product._id);
-    if (existing) clearInterval(existing);
+  //   // ② Clear any lingering interval
+  //   const existing = this.hoverIntervals.get(product._id);
+  //   if (existing) clearInterval(existing);
 
-    // ③ Reset to first slide
-    this.cardImageIndexes.set(product._id, 0);
+  //   // ③ Reset to first slide
+  //   this.cardImageIndexes.set(product._id, 0);
 
-    // ④ Advance slide every 900ms (longer than 450ms transition so slides complete)
-    const total = product.images.length;
-    const interval = setInterval(() => {
-      const current = this.cardImageIndexes.get(product._id) ?? 0;
-      const next = current + 1;
+  //   // ④ Advance slide every 900ms (longer than 450ms transition so slides complete)
+  //   const total = product.images.length;
+  //   const interval = setInterval(() => {
+  //     const current = this.cardImageIndexes.get(product._id) ?? 0;
+  //     const next = current + 1;
 
-      if (next >= total) {
-        // Instant jump back to first: disable transition → set 0 → re-enable
-        this.noTransitionProducts.add(product._id);
-        this.cardImageIndexes.set(product._id, 0);
+  //     if (next >= total) {
+  //       // Instant jump back to first: disable transition → set 0 → re-enable
+  //       this.noTransitionProducts.add(product._id);
+  //       this.cardImageIndexes.set(product._id, 0);
 
-        // One rAF is enough for the browser to apply the no-transition state
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            this.noTransitionProducts.delete(product._id);
-          });
-        });
-      } else {
-        this.cardImageIndexes.set(product._id, next);
-      }
-    }, 900);
+  //       // One rAF is enough for the browser to apply the no-transition state
+  //       requestAnimationFrame(() => {
+  //         requestAnimationFrame(() => {
+  //           this.noTransitionProducts.delete(product._id);
+  //         });
+  //       });
+  //     } else {
+  //       this.cardImageIndexes.set(product._id, next);
+  //     }
+  //   }, 900);
 
-    this.hoverIntervals.set(product._id, interval);
-  }
+  //   this.hoverIntervals.set(product._id, interval);
+  // }
 
-  onImageMouseLeave(product: Product): void {
-    this.hoveredProduct = null;
-    const interval = this.hoverIntervals.get(product._id);
-    if (interval) {
-      clearInterval(interval);
-      this.hoverIntervals.delete(product._id);
-    }
-    // Slide back to first image (animated — looks like a natural rewind)
-    this.cardImageIndexes.set(product._id, 0);
-  }
+  // onImageMouseLeave(product: Product): void {
+  //   this.hoveredProduct = null;
+  //   const interval = this.hoverIntervals.get(product._id);
+  //   if (interval) {
+  //     clearInterval(interval);
+  //     this.hoverIntervals.delete(product._id);
+  //   }
+  //   // Slide back to first image (animated — looks like a natural rewind)
+  //   this.cardImageIndexes.set(product._id, 0);
+  // }
 
-  getImageDotsCount(product: Product): number[] {
-    return product.images?.length > 1
-      ? Array.from({ length: product.images.length }, (_, i) => i)
-      : [];
-  }
+  // getImageDotsCount(product: Product): number[] {
+  //   return product.images?.length > 1
+  //     ? Array.from({ length: product.images.length }, (_, i) => i)
+  //     : [];
+  // }
 
   ngOnDestroy(): void {
-    this.hoverIntervals.forEach(clearInterval);
+    // this.hoverIntervals.forEach(clearInterval);
     this.destroy$.next();
     this.destroy$.complete();
 
