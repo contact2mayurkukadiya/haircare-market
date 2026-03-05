@@ -25,8 +25,8 @@ import { CategoriesModule } from './categories/categories.module';
     AdminModule,
     CategoriesModule,
     ServeStaticModule.forRoot({
-      rootPath: join(process.cwd(), 'uploads', 'products'),
-      serveRoot: '/static/products',
+      rootPath: join(process.cwd(), 'uploads'),
+      serveRoot: '/static',
     }),
   ],
   controllers: [AppController],

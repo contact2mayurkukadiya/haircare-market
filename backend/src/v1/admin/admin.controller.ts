@@ -3,7 +3,8 @@ import { Controller, Post, Get, Body, Param, Put, Delete, UseGuards, Request, Un
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { extname } from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import { diskStorage } from 'multer';
+import { memoryStorage } from 'multer'; // <--- Use this
+
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody, ApiParam } from '@nestjs/swagger';
 import { AdminService, type IAdminPreview } from './admin.service';
 import { ProductsService } from '../products/products.service';
@@ -11,24 +12,56 @@ import { CreateProductDto, UpdateProductDto } from '../products/dto';
 import { IProduct } from 'src/interfaces';
 import { AdminAuthGuard } from './guards/admin-auth.guard';
 import type { JwtAdminPayload } from './strategies/admin-jwt.strategy';
+import * as sharp from 'sharp';
+import { join } from 'path';
+import { InternalServerErrorException } from '@nestjs/common';
+import { mkdir } from 'fs/promises';
 
 @ApiTags('Admin')
 @Controller({ version: '1', path: 'admin' })
 export class AdminController {
     // Shared multer storage configuration for product images
     private static multerOptions = {
-        storage: diskStorage({
-            destination: './uploads/products',
-            filename: (req, file, cb) => {
-                const uniqueName = `${uuidv4()}${extname(file.originalname)}`;
-                cb(null, uniqueName);
-            },
-        }),
+        storage: memoryStorage()
     };
     constructor(
         private readonly adminService: AdminService,
         private readonly productsService: ProductsService,
     ) { }
+
+    private async processAndSaveImages(files: Express.Multer.File[]): Promise<string[]> {
+        const productDir = join(process.cwd(), 'uploads', 'products');
+        const thumbDir = join(process.cwd(), 'uploads', 'thumbnails');
+        const filenames: string[] = [];
+
+        // Ensure directories exist
+        await mkdir(productDir, { recursive: true });
+        await mkdir(thumbDir, { recursive: true });
+
+        for (const file of files) {
+            const filename = `${uuidv4()}.webp`;
+
+            try {
+                // 1. Generate & Save Thumbnail (Width: 350px, Low Quality for Speed)
+                await sharp.default(file.buffer)
+                    .resize({ width: 200, withoutEnlargement: true })
+                    .webp({ quality: 80 })
+                    .toFile(join(thumbDir, filename));
+
+                // 2. Generate & Save Original (HD Max 1920px, High Quality)
+                await sharp.default(file.buffer)
+                    .resize({ width: 1920, withoutEnlargement: true }) // Limit insane resolutions
+                    .webp({ quality: 100 })
+                    .toFile(join(productDir, filename));
+
+                filenames.push(filename);
+            } catch (error) {
+                console.error(`Error processing image ${file.originalname}:`, error);
+                throw new InternalServerErrorException('Image processing failed');
+            }
+        }
+        return filenames;
+    }
 
     /**************************************************************
      * AUTH
@@ -88,12 +121,14 @@ export class AdminController {
     @UseGuards(AdminAuthGuard)
     @UseInterceptors(FilesInterceptor('images', 10, AdminController.multerOptions))
     @Post('products')
-    createProduct(
+    async createProduct(
         @UploadedFiles() files: Express.Multer.File[],
         @Body() createProductDto: CreateProductDto
     ): Promise<IProduct> {
         if (files && files.length > 0) {
-            createProductDto.images = files.map((file) => file.filename);
+            // Process images before sending DTO to service
+            const processedNames = await this.processAndSaveImages(files);
+            createProductDto.images = processedNames;
         }
         return this.productsService.create(createProductDto);
     }
@@ -105,13 +140,15 @@ export class AdminController {
     @UseGuards(AdminAuthGuard)
     @UseInterceptors(FilesInterceptor('new_images', 10, AdminController.multerOptions))
     @Put('products/:productId')
-    updateProduct(
+    async updateProduct(
         @Param('productId') productId: string,
         @UploadedFiles() files: Express.Multer.File[],
         @Body() updateProductDto: UpdateProductDto,
     ): Promise<IProduct> {
         if (files && files.length > 0) {
-            updateProductDto.new_images = files.map((file) => file.filename);
+            // Process images before sending DTO to service
+            const processedNames = await this.processAndSaveImages(files);
+            updateProductDto.new_images = processedNames;
         }
         return this.productsService.update(productId, updateProductDto);
     }

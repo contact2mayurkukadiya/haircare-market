@@ -28,7 +28,8 @@ export interface ProductFilters {
 }
 
 
-const UPLOADS_DIR = join(process.cwd(), 'uploads', 'products');
+const PRODUCTS_DIR = join(process.cwd(), 'uploads', 'products');
+const THUMB_DIR = join(process.cwd(), 'uploads', 'thumbnails');
 
 @Injectable()
 export class ProductsService {
@@ -37,15 +38,22 @@ export class ProductsService {
     private readonly productsModel: Model<ProductsDocument>,
   ) { }
 
-  private mapProduct(product: any): any {
+  private mapProduct(product: any, view: 'list' | 'detail' = 'list'): any {
     if (product?.images && product.images.length > 0) {
-      product.images = product.images.map(
-        (img: string) => img.startsWith('http') || img.startsWith('/static') ? img : `http://localhost:3000/static/products/${img}`
-      );
+      // Determines base folder based on view type
+      const folder = view === 'list' ? 'thumbnails' : 'products';
+
+      product.images = product.images.map((img: string) => {
+        // If it's already a full URL (external), leave it. Otherwise construct local path.
+        if (img.startsWith('http') || img.startsWith('/static')) return img;
+        return `${process.env.SERVER_URL}/static/${folder}/${img}`;
+      });
     }
     return product;
   }
 
+
+  // LIST View
   async findAll(page = 1, limit = 12): Promise<PaginatedResult<IProduct>> {
     const skip = (page - 1) * limit;
     const [products, total] = await Promise.all([
@@ -53,7 +61,7 @@ export class ProductsService {
       this.productsModel.countDocuments({}),
     ]);
     return {
-      data: products.map(p => this.mapProduct(p)) as unknown as IProduct[],
+      data: products.map(p => this.mapProduct(p, 'list')) as unknown as IProduct[],
       total,
       page,
       limit,
@@ -155,7 +163,7 @@ export class ProductsService {
     const aggResult = result[0] || { data: [], totalCount: [] };
 
     const total = aggResult.totalCount[0]?.count || 0;
-    const products = (aggResult.data as any[]).map(p => this.mapProduct(p)) as IProduct[];
+    const products = (aggResult.data as any[]).map(p => this.mapProduct(p, 'list')) as IProduct[];
 
     return {
       data: products,
@@ -172,7 +180,7 @@ export class ProductsService {
   async findOne(productId: string): Promise<IProduct> {
     const product = await this.productsModel.findById(productId).populate('category').lean();
     if (!product) throw new NotFoundException('Product not found');
-    return this.mapProduct(product) as unknown as IProduct;
+    return this.mapProduct(product, 'detail') as unknown as IProduct;
   }
 
   async create(createProductDto: CreateProductDto): Promise<IProduct> {
@@ -182,7 +190,7 @@ export class ProductsService {
       throw new InternalServerErrorException('Unable to create product, please try again');
     }
     const populatedProduct = await this.productsModel.findById(createdProduct._id).populate('category').lean();
-    return this.mapProduct(populatedProduct) as unknown as IProduct;
+    return this.mapProduct(populatedProduct, 'detail') as unknown as IProduct;
   }
 
   async update(
@@ -228,7 +236,8 @@ export class ProductsService {
     await Promise.allSettled(
       removedImages.map(async (filename) => {
         try {
-          await unlink(join(UPLOADS_DIR, filename));
+          try { await unlink(join(PRODUCTS_DIR, filename)); } catch (e) { }
+          try { await unlink(join(THUMB_DIR, filename)); } catch (e) { }
         } catch (err: any) {
           // File may already be gone — not a fatal error
           console.warn(`Could not delete image file "${filename}": ${err.message}`);
@@ -246,7 +255,7 @@ export class ProductsService {
       { new: true, lean: true },
     ).populate('category');
     if (!updatedProduct) throw new BadRequestException('Unable to update product');
-    return this.mapProduct(updatedProduct) as unknown as IProduct;
+    return this.mapProduct(updatedProduct, 'detail') as unknown as IProduct;
   }
 
   async remove(productId: string): Promise<string> {
@@ -256,7 +265,8 @@ export class ProductsService {
       await Promise.allSettled(
         product.images.map(async (filename: string) => {
           try {
-            await unlink(join(UPLOADS_DIR, filename));
+            try { await unlink(join(PRODUCTS_DIR, filename)); } catch (e) { }
+            try { await unlink(join(THUMB_DIR, filename)); } catch (e) { }
           } catch (err: any) {
             console.warn(`Could not delete image "${filename}": ${err.message}`);
           }
