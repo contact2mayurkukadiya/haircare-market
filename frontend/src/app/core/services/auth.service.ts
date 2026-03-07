@@ -4,11 +4,25 @@ import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 
+export interface Address {
+    street?: string;
+    city?: string;
+    state?: string;
+    zip?: string;
+    country?: string;
+    phone?: string;
+}
+
+
 export interface User {
     _id: string;
     name: string;
     email: string;
     is_verified: boolean;
+    avatar?: string;
+    address?: Address;
+    phone?: string;
+    is_phone_verified?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -25,6 +39,74 @@ export class AuthService {
             const u = localStorage.getItem('user');
             return u ? JSON.parse(u) : null;
         } catch { return null; }
+    }
+
+    /** Fetch latest profile from server and sync signal + localStorage */
+    fetchProfile(): Observable<User> {
+        return this.api.get<User>('/users/profile').pipe(
+            tap(user => {
+                this._user.set(user);
+                localStorage.setItem('user', JSON.stringify(user));
+            })
+        );
+    }
+
+    // ---- Phone Verification API Calls ----
+
+    getPhoneConfig(): Observable<{ isPhoneVerificationOn: boolean }> {
+        return this.api.get<{ isPhoneVerificationOn: boolean }>('/users/phone/config');
+    }
+
+    sendPhoneOtp(phone: string): Observable<{ message: string }> {
+        return this.api.post<{ message: string }>('/users/phone/send-otp', { phone });
+    }
+
+    verifyPhoneOtp(phone: string, otp: string): Observable<{ message: string }> {
+        return this.api.post<{ message: string }>('/users/phone/verify', { phone, otp }).pipe(
+            tap(() => this.fetchProfile().subscribe()) // Refresh user profile to get is_phone_verified=true
+        );
+    }
+
+    savePhone(phone: string): Observable<{ message: string }> {
+        return this.api.post<{ message: string }>('/users/phone/save', { phone }).pipe(
+            tap(() => this.fetchProfile().subscribe()) // Refresh user profile to get is_phone_verified=true and updated phone
+        );
+    }
+
+    // ---- End Phone Verification API Calls ----
+
+    uploadAvatar(file: File): Observable<{ avatar: string }> {
+        const formData = new FormData();
+        formData.append('file', file);
+        return this.api.post<{ avatar: string }>('/users/avatar', formData).pipe(
+            tap(res => {
+                // Update local state signal
+                const current = this._user();
+                if (current) {
+                    const updated = { ...current, avatar: res.avatar };
+                    this._user.set(updated);
+                    localStorage.setItem('user', JSON.stringify(updated));
+                }
+            })
+        );
+    }
+
+    updateAddress(address: Address): Observable<User> {
+        return this.api.patch<User>('/users/profile', { address }).pipe(
+            tap(user => {
+                // Usually API returns updated user preview. Update signal.
+                this._user.set(user);
+                localStorage.setItem('user', JSON.stringify(user));
+            })
+        );
+    }
+
+    initChangePassword(currentPassword: string): Observable<{ message: string }> {
+        return this.api.post('/users/change-password/init', { currentPassword });
+    }
+
+    completeChangePassword(otp: string, newPassword: string): Observable<{ message: string }> {
+        return this.api.post('/users/change-password/complete', { otp, newPassword });
     }
 
     register(data: { name: string; email: string; password: string }): Observable<{ message: string }> {

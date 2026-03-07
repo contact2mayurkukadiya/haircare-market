@@ -1,5 +1,5 @@
 // prettier-ignore
-import { BadRequestException, ForbiddenException, HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, HttpException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import type { Model, ObjectId } from 'mongoose';
 import * as bcrypt from 'bcrypt';
@@ -9,14 +9,24 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersDocument } from './entities';
 import { IUser, IUserPreview } from 'src/interfaces';
 import { EmailService } from '../email/email.service';
+import { Twilio } from 'twilio';
 
 @Injectable()
 export class UsersService {
+  private twilioClient: Twilio;
+
   constructor(
     @InjectModel('users')
     private usersModel: Model<UsersDocument>,
     private readonly emailService: EmailService,
-  ) { }
+  ) {
+    if (process.env.isPhoneVerificationOn === 'true') {
+      this.twilioClient = new Twilio(
+        process.env.TWILIO_ACCOUNT_SID,
+        process.env.TWILIO_AUTH_TOKEN
+      );
+    }
+  }
 
   private async hashString(str: string): Promise<string> {
     const salt = await bcrypt.genSalt(10);
@@ -112,42 +122,154 @@ export class UsersService {
     throw new NotFoundException('User not found');
   }
 
-  async update(
-    user: UsersDocument,
-    userId: string,
-    updateUserDto: UpdateUserDto,
-  ): Promise<UsersDocument> {
-    if (user._id.toString() !== userId) {
-      throw new ForbiddenException('You are forbidden from changing this data');
-    }
-
-    const updateQueue: IUser = {
-      name: user.name,
-      email: user.email,
-      password: user.password,
-    };
-
-    if (updateUserDto.new_password) {
-      if (!updateUserDto.new_confirm_password) {
-        throw new HttpException('confirm_password is required', 400);
-      }
-      if (updateUserDto.new_password === updateUserDto.new_confirm_password) {
-        updateQueue.password = await this.hashString(updateUserDto.new_password);
-      } else throw new HttpException("passwords don't match", 400);
-    }
-    if (updateUserDto.new_email) updateQueue.email = updateUserDto.new_email;
-    if (updateUserDto.new_name) updateQueue.name = updateUserDto.new_name;
+  async updateProfile(userId: string, updateUserDto: UpdateUserDto): Promise<UsersDocument> {
+    const updateData: any = {};
+    if (updateUserDto.name) updateData.name = updateUserDto.name;
+    if (updateUserDto.address) updateData.address = updateUserDto.address;
 
     const updatedUser = await this.usersModel.findByIdAndUpdate(
       userId,
-      { ...updateQueue },
-      { new: true },
+      { $set: updateData },
+      { new: true }
     );
-    if (!updatedUser) {
-      throw new BadRequestException('Unable to update user, please try again later');
-    }
+
+    if (!updatedUser) throw new BadRequestException('Unable to update user');
     return updatedUser;
   }
+
+  async updateAvatar(userId: string, filename: string): Promise<UsersDocument> {
+    const updated = await this.usersModel.findByIdAndUpdate(
+      userId,
+      { avatar: filename },
+      { new: true }
+    );
+    if (!updated) throw new NotFoundException('User not found');
+    return updated;
+  }
+
+
+
+
+  // ---- Phone Verification Logic ----
+
+  async sendPhoneOtp(userId: string, phone: string): Promise<{ message: string }> {
+    if (process.env.isPhoneVerificationOn !== 'true') {
+      throw new BadRequestException('Phone verification is disabled');
+    }
+
+    const user = await this.usersModel.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+
+    const otp = this.generateOtp();
+    const hashedOtp = await this.hashString(otp);
+    const otp_expires_at = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    await this.usersModel.findByIdAndUpdate(userId, {
+      phone_otp: hashedOtp,
+      phone_otp_expires_at: otp_expires_at,
+    });
+
+    try {
+      await this.twilioClient.messages.create({
+        body: `Your Haircare Market verification code is: ${otp}`,
+        from: process.env.TWILIO_PHONE_NUMBER,
+        to: phone
+      });
+      return { message: 'OTP sent successfully to your phone' };
+    } catch (error: any) {
+      throw new InternalServerErrorException(`Failed to send SMS: ${error.message}`);
+    }
+  }
+
+  async verifyPhoneOtp(userId: string, phone: string, otp: string): Promise<{ message: string }> {
+    if (process.env.isPhoneVerificationOn !== 'true') {
+      throw new BadRequestException('Phone verification is disabled');
+    }
+
+    const user = await this.usersModel.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+
+    if (!user.phone_otp || !user.phone_otp_expires_at) {
+      throw new BadRequestException('No OTP found. Please request a new one');
+    }
+
+    if (new Date() > user.phone_otp_expires_at) {
+      throw new BadRequestException('OTP has expired. Please request a new one');
+    }
+
+    const isValid = await bcrypt.compare(otp, user.phone_otp);
+    if (!isValid) throw new BadRequestException('Invalid OTP');
+
+    await this.usersModel.findByIdAndUpdate(userId, {
+      phone: phone,
+      is_phone_verified: true,
+      $unset: { phone_otp: '', phone_otp_expires_at: '' },
+    });
+
+    return { message: 'Phone verified successfully' };
+  }
+
+  async savePhone(userId: string, phone: string): Promise<{ message: string }> {
+    // This is used when verification is OFF
+    if (process.env.isPhoneVerificationOn === 'true') {
+      throw new BadRequestException('Phone verification is required');
+    }
+
+    const user = await this.usersModel.findByIdAndUpdate(userId, {
+      phone: phone,
+      is_phone_verified: true // Implicitly true when verification config is off
+    });
+
+    if (!user) throw new NotFoundException('User not found');
+    return { message: 'Phone number saved successfully' };
+  }
+
+  // ---- End Phone Verification Logic ----
+
+  async initChangePassword(userId: string, currentPass: string): Promise<{ message: string }> {
+    const user = await this.usersModel.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+
+    // Verify current password
+    const isValid = await bcrypt.compare(currentPass, user.password);
+    if (!isValid) throw new UnauthorizedException('Current password is incorrect');
+
+    // Generate and save OTP
+    const otp = this.generateOtp();
+    const hashedOtp = await this.hashString(otp);
+    const otp_expires_at = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
+
+    await this.usersModel.findByIdAndUpdate(userId, { otp: hashedOtp, otp_expires_at });
+
+    // Send Email
+    await this.emailService.sendOtpEmail(user.email, user.name, otp);
+
+    return { message: 'OTP sent to your email.' };
+  }
+
+  async completeChangePassword(userId: string, otp: string, newPass: string): Promise<{ message: string }> {
+    const user = await this.usersModel.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+    if (!user.otp || !user.otp_expires_at) throw new BadRequestException('Request expired or invalid. Please try again.');
+
+    if (new Date() > user.otp_expires_at) {
+      throw new BadRequestException('OTP expired');
+    }
+
+    const isOtpValid = await bcrypt.compare(otp, user.otp);
+    if (!isOtpValid) throw new BadRequestException('Invalid OTP');
+
+    const hashedNewPass = await this.hashString(newPass);
+
+    await this.usersModel.findByIdAndUpdate(userId, {
+      password: hashedNewPass,
+      $unset: { otp: '', otp_expires_at: '' }
+    });
+
+    return { message: 'Password updated successfully' };
+  }
+
+
 
   async remove(userId: string): Promise<string> {
     await this.usersModel

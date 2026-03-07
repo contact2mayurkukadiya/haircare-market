@@ -28,6 +28,9 @@ export class AuthController {
                 name: user.name,
                 email: user.email,
                 is_verified: user.is_verified,
+                avatar: user.avatar
+                    ? `${process.env.SERVER_URL}/static/avatars/${user.avatar}`
+                    : undefined,
             },
         };
     }

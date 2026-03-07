@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './pages/home/home.component';
+import { authGuard } from './core/guards/auth.guard';
+import { ProfileLayoutComponent } from './pages/profile/layout/profile-layout.component';
 
 export const routes: Routes = [
     { path: '', component: HomeComponent },
@@ -12,6 +14,26 @@ export const routes: Routes = [
     { path: 'about', loadComponent: () => import('./pages/info/about/about.component').then(m => m.AboutComponent) },
     { path: 'contact', loadComponent: () => import('./pages/info/contact/contact.component').then(m => m.ContactComponent) },
     { path: 'privacy-policy', loadComponent: () => import('./pages/info/privacy-policy/privacy-policy.component').then(m => m.PrivacyPolicyComponent) },
+    {
+        path: 'profile',
+        component: ProfileLayoutComponent,
+        canActivate: [authGuard],
+        children: [
+            { path: '', redirectTo: 'details', pathMatch: 'full' },
+            {
+                path: 'details',
+                loadComponent: () => import('./pages/profile/details/profile-details.component').then(m => m.ProfileDetailsComponent)
+            },
+            {
+                path: 'security',
+                loadComponent: () => import('./pages/profile/security/profile-security.component').then(m => m.ProfileSecurityComponent)
+            },
+            {
+                path: 'payments',
+                loadComponent: () => import('./pages/profile/payments/profile-payments.component').then(m => m.ProfilePaymentsComponent)
+            }
+        ]
+    },
     { path: '**', redirectTo: '' },
 ];
 

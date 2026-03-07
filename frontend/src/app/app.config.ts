@@ -25,7 +25,14 @@ import {
   DeleteOutline,
   AppstoreOutline,
   ShoppingCartOutline,
-  UnorderedListOutline
+  UnorderedListOutline,
+  LockOutline,
+  CreditCardOutline,
+  CameraOutline,
+  CarOutline,
+  LoadingOutline,
+  EnvironmentOutline,
+  PhoneOutline
 } from '@ant-design/icons-angular/icons';
 registerLocaleData(en);
 
@@ -44,7 +51,14 @@ const icons: IconDefinition[] = [
   DeleteOutline,
   AppstoreOutline,
   ShoppingCartOutline,
-  UnorderedListOutline
+  UnorderedListOutline,
+  LockOutline,
+  CreditCardOutline,
+  CameraOutline,
+  CarOutline,
+  LoadingOutline,
+  EnvironmentOutline,
+  PhoneOutline
 ];
 
 export const appConfig: ApplicationConfig = {

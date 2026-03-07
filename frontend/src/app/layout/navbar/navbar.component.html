@@ -26,23 +26,54 @@
 
       <!-- Auth -->
       @if (auth.isLoggedIn()) {
-        <div nz-dropdown [nzDropdownMenu]="userMenu" nzTrigger="click" class="user-avatar-btn" title="Account">
-          <div class="user-avatar">{{ auth.user()!.name[0].toUpperCase() }}</div>
-        </div>
-        <nz-dropdown-menu #userMenu="nzDropdownMenu">
-          <ul nz-menu class="user-dropdown">
-            <li nz-menu-item class="user-info-item">
-              <strong>{{ auth.user()!.name }}</strong>
-              <span>{{ auth.user()!.email }}</span>
-            </li>
-            <li nz-menu-divider></li>
-            <li nz-menu-item (click)="auth.logout()">
-              <span nz-icon nzType="logout"></span> Logout
-            </li>
-          </ul>
-        </nz-dropdown-menu>
+      <div nz-dropdown [nzDropdownMenu]="userMenu" nzTrigger="click" class="user-avatar-btn" title="Account">
+        @if (auth.user()?.avatar) {
+        <img [src]="auth.user()!.avatar" class="user-avatar-img" alt="Profile">
+        } @else {
+        <div class="user-avatar">{{ auth.user()!.name[0].toUpperCase() }}</div>
+        }
+      </div>
+
+      <nz-dropdown-menu #userMenu="nzDropdownMenu">
+        <ul nz-menu class="user-dropdown">
+
+          <!-- Option 1: Header (Name & Image) -->
+          <li nz-menu-item class="user-header-item">
+            <div class="flex items-center gap-3">
+              @if (auth.user()?.avatar) {
+              <img [src]="auth.user()!.avatar" class="menu-avatar-img">
+              } @else {
+              <div class="menu-avatar-placeholder">
+                {{ auth.user()!.name[0].toUpperCase() }}
+              </div>
+              }
+              <div class="flex flex-col overflow-hidden">
+                <strong class="text-sm text-gray-800 truncate max-w-[140px]">{{ auth.user()!.name }}</strong>
+                <span class="text-xs text-gray-500 truncate max-w-[140px]">{{ auth.user()!.email }}</span>
+              </div>
+            </div>
+          </li>
+
+          <li nz-menu-divider></li>
+
+          <!-- Option 2: Profile Link -->
+          <li nz-menu-item routerLink="/profile">
+            <span nz-icon nzType="user"></span>
+            <span class="ml-2">My Profile</span>
+          </li>
+
+          <li nz-menu-divider></li>
+
+          <!-- Option 3: Logout -->
+          <li nz-menu-item (click)="auth.logout()" class="text-red-600 hover:text-red-700 hover:bg-red-50">
+            <span nz-icon nzType="logout"></span>
+            <span class="ml-2">Logout</span>
+          </li>
+        </ul>
+      </nz-dropdown-menu>
+
       } @else {
-        <a routerLink="/auth/login" class="btn-primary sign-in-btn">Sign In</a>
+      <a routerLink="/auth/login" class="btn-primary sign-in-btn">Sign In</a>
       }
     </div>
   </div>

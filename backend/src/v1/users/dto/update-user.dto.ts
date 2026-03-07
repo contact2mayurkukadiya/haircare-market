@@ -1,27 +1,25 @@
-import { IsString, IsEmail, IsOptional, MinLength } from 'class-validator';
+import { IsString, IsEmail, IsOptional, ValidateNested } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { LoginUserDto } from './login-user.dto';
+import { Type } from 'class-transformer';
 
-export class UpdateUserDto extends LoginUserDto {
+class AddressDto {
+  @IsOptional() @IsString() street?: string;
+  @IsOptional() @IsString() city?: string;
+  @IsOptional() @IsString() state?: string;
+  @IsOptional() @IsString() zip?: string;
+  @IsOptional() @IsString() country?: string;
+}
+
+
+export class UpdateUserDto {
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
-  new_name?: string;
+  name?: string;
 
   @ApiProperty({ required: false })
-  @IsEmail()
   @IsOptional()
-  new_email?: string;
-
-  @ApiProperty({ required: false, minLength: 8 })
-  @MinLength(8)
-  @IsString()
-  @IsOptional()
-  new_password?: string;
-
-  @ApiProperty({ required: false, minLength: 8 })
-  @MinLength(8)
-  @IsString()
-  @IsOptional()
-  new_confirm_password?: string;
+  @ValidateNested()
+  @Type(() => AddressDto)
+  address?: AddressDto;
 }
