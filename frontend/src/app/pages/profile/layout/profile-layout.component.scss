@@ -1,0 +1,16 @@
+.nav-item {
+        display: flex; align-items: center; gap: 12px;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #f3f4f6;
+        color: var(--text-secondary);
+        transition: all 0.2s;
+        
+        &:last-child { border-bottom: none; }
+        &:hover { background-color: #f9fafb; color: var(--brand-primary); }
+    }
+    .active-link {
+        background-color: #f0fdf4 !important; /* brand-light */
+        color: var(--brand-dark) !important;
+        font-weight: 600;
+        border-left: 3px solid var(--brand-primary);
+    }

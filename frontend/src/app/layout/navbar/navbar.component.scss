@@ -48,9 +48,95 @@
   display: flex; align-items: center; justify-content: center;
 }
 
-.user-dropdown { min-width: 200px; }
-.user-info-item { display: flex; flex-direction: column; gap: 2px; padding: 0.75rem 1rem; cursor: default; }
-.user-info-item strong { font-size: 0.95rem; color: var(--text-primary); }
-.user-info-item span { font-size: 0.8rem; color: var(--text-muted); }
-
 .sign-in-btn { padding: 0.45rem 1.1rem; font-size: 0.85rem; }
+
+
+/* --- Avatar Trigger --- */
+.user-avatar-btn {
+  cursor: pointer;
+  border-radius: 50%;
+  transition: box-shadow 0.2s;
+  
+  &:hover {
+    box-shadow: 0 0 0 3px var(--brand-light);
+  }
+}
+
+/* Fallback Circle (Existing) */
+.user-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--brand-primary); color: #fff;
+  font-weight: 700; font-size: 0.95rem;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* New: Real Image Trigger */
+.user-avatar-img {
+  width: 36px; height: 36px; border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  border: 1px solid #e2e8f0;
+}
+
+.menu-avatar-img {
+  width: 40px; height: 40px; border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  border: 1px solid #e2e8f0;
+}
+
+/* --- Dropdown Styles --- */
+.user-dropdown {
+  min-width: 240px;
+  padding: 4px 0;
+}
+
+/* Header Item Container */
+.user-header-item {
+  cursor: default !important; /* Override button cursor */
+  opacity: 1 !important;      /* Override disabled opacity */
+  padding: 10px 16px !important;
+  color: inherit !important;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Header Images */
+.header-avatar-img {
+  width: 40px; height: 40px; border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #eee;
+}
+
+.header-avatar-placeholder {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--brand-secondary); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 1rem;
+}
+
+/* Header Text */
+.user-text {
+  display: flex; flex-direction: column;
+  overflow: hidden;
+
+  strong {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  
+  span {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+}
+
+/* Utility Helpers */
+.ml-2 { margin-left: 0.5rem; }
+.text-danger { color: #dc2626; &:hover { background-color: #fef2f2; color: #b91c1c; } }

@@ -42,6 +42,10 @@ export class ApiService {
         return this.http.put<T>(`${BASE_URL}${path}`, body, { headers: this.getHeaders() });
     }
 
+    patch<T>(path: string, body: any): Observable<T> {
+        return this.http.patch<T>(`${BASE_URL}${path}`, body, { headers: this.getHeaders() });
+    }
+
     delete<T>(path: string): Observable<T> {
         return this.http.delete<T>(`${BASE_URL}${path}`, { headers: this.getHeaders() });
     }
