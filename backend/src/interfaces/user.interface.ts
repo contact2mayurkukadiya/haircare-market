@@ -20,6 +20,8 @@ export interface IUser {
   otp_expires_at?: Date;
   phone_otp?: string;
   phone_otp_expires_at?: Date;
+  reset_password_otp?: string;
+  reset_password_otp_expires_at?: Date;
 }
 
 export type IUserPreview = Pick<IUser, '_id' | 'email' | 'name' | 'is_verified' | 'avatar' | 'address' | 'phone' | 'is_phone_verified'>;

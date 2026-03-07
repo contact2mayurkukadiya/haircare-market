@@ -41,4 +41,26 @@ export class EmailService {
             throw new InternalServerErrorException('Failed to send OTP email. Please try again.');
         }
     }
+
+    async sendPasswordResetOtpEmail(to: string, name: string, otp: string): Promise<void> {
+        const templatePath = path.join(process.cwd(), 'src', 'templates', 'password-reset-otp.ejs');
+
+        let html: string;
+        try {
+            html = await ejs.renderFile(templatePath, { name, otp, expiryMinutes: 10 });
+        } catch {
+            throw new InternalServerErrorException('Failed to render password reset email template');
+        }
+
+        try {
+            await this.transporter.sendMail({
+                from: `"Haircare Market" <${this.configService.get<string>('smtp.user')}>`,
+                to,
+                subject: 'Reset your Haircare Market password',
+                html,
+            });
+        } catch {
+            throw new InternalServerErrorException('Failed to send password reset OTP email. Please try again.');
+        }
+    }
 }

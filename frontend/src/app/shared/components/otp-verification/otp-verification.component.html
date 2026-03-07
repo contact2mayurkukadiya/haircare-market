@@ -1,0 +1,36 @@
+<nz-modal [nzVisible]="visible()" [nzTitle]="title()" (nzOnCancel)="handleCancel()" [nzFooter]="null"
+    [nzCentered]="true">
+    <ng-container *nzModalContent>
+        <div class="text-center py-4">
+            <div class="mb-4 text-4xl">🔐</div>
+            <p class="text-gray-600 mb-6 font-medium">{{ message() }}</p>
+
+            <input
+                class="w-full text-center text-3xl tracking-[0.5em] font-bold border border-gray-300 rounded-xl py-3 text-gray-800 
+                          focus:outline-none focus:border-[#1a6b3c] focus:ring-4 focus:ring-[#1a6b3c]/10 transition-all mb-8 placeholder:text-gray-200"
+                [(ngModel)]="otpValue" maxlength="6" placeholder="------">
+
+            <button (click)="submit()" [disabled]="!otpValue || otpValue.length < 6"
+                class="w-full btn-primary flex items-center justify-center gap-2 px-6 h-10 text-[0.95rem] disabled:cursor-not-allowed font-semibold">
+                @if(isLoading()) {
+                <span nz-icon nzType="loading" [nzTheme]="'outline'"></span>
+                } @else {
+                <span>Verify Code</span>
+                }
+            </button>
+
+            <!-- Resend OTP button -->
+            <div class="mt-4">
+                <button type="button"
+                    class="text-sm font-semibold text-[#1a6b3c] hover:underline focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                    (click)="resend()" [disabled]="isResending()">
+                    @if(isResending()) {
+                    <span nz-icon nzType="loading" nzTheme="outline" class="mr-1"></span> Sending...
+                    } @else {
+                    Resend OTP
+                    }
+                </button>
+            </div>
+        </div>
+    </ng-container>
+</nz-modal>

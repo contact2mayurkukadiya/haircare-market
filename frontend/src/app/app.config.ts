@@ -32,7 +32,9 @@ import {
   CarOutline,
   LoadingOutline,
   EnvironmentOutline,
-  PhoneOutline
+  PhoneOutline,
+  EyeOutline,
+  EyeInvisibleOutline
 } from '@ant-design/icons-angular/icons';
 registerLocaleData(en);
 
@@ -58,7 +60,9 @@ const icons: IconDefinition[] = [
   CarOutline,
   LoadingOutline,
   EnvironmentOutline,
-  PhoneOutline
+  PhoneOutline,
+  EyeOutline,
+  EyeInvisibleOutline
 ];
 
 export const appConfig: ApplicationConfig = {

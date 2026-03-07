@@ -239,31 +239,72 @@ export class UsersService {
     const hashedOtp = await this.hashString(otp);
     const otp_expires_at = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
 
-    await this.usersModel.findByIdAndUpdate(userId, { otp: hashedOtp, otp_expires_at });
+    await this.usersModel.findByIdAndUpdate(userId, { reset_password_otp: hashedOtp, reset_password_otp_expires_at: otp_expires_at });
 
     // Send Email
-    await this.emailService.sendOtpEmail(user.email, user.name, otp);
+    await this.emailService.sendPasswordResetOtpEmail(user.email, user.name, otp);
 
-    return { message: 'OTP sent to your email.' };
+    return { message: 'Password reset OTP sent to your email.' };
   }
 
   async completeChangePassword(userId: string, otp: string, newPass: string): Promise<{ message: string }> {
     const user = await this.usersModel.findById(userId);
     if (!user) throw new NotFoundException('User not found');
-    if (!user.otp || !user.otp_expires_at) throw new BadRequestException('Request expired or invalid. Please try again.');
+    if (!user.reset_password_otp || !user.reset_password_otp_expires_at) throw new BadRequestException('Request expired or invalid. Please try again.');
 
-    if (new Date() > user.otp_expires_at) {
+    if (new Date() > user.reset_password_otp_expires_at) {
       throw new BadRequestException('OTP expired');
     }
 
-    const isOtpValid = await bcrypt.compare(otp, user.otp);
+    const isOtpValid = await bcrypt.compare(otp, user.reset_password_otp);
     if (!isOtpValid) throw new BadRequestException('Invalid OTP');
 
     const hashedNewPass = await this.hashString(newPass);
 
     await this.usersModel.findByIdAndUpdate(userId, {
       password: hashedNewPass,
-      $unset: { otp: '', otp_expires_at: '' }
+      $unset: { reset_password_otp: '', reset_password_otp_expires_at: '' }
+    });
+
+    return { message: 'Password updated successfully' };
+  }
+
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    const user = await this.usersModel.findOne({ email });
+    if (!user) {
+      // Return success even if user not found to prevent email enumeration
+      return { message: 'If an account exists with this email, a password reset OTP has been sent.' };
+    }
+
+    const otp = this.generateOtp();
+    const hashedOtp = await this.hashString(otp);
+    const otp_expires_at = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
+
+    await this.usersModel.findByIdAndUpdate(user._id, { reset_password_otp: hashedOtp, reset_password_otp_expires_at: otp_expires_at });
+
+    // Send Email
+    await this.emailService.sendPasswordResetOtpEmail(user.email, user.name, otp);
+
+    return { message: 'If an account exists with this email, a password reset OTP has been sent.' };
+  }
+
+  async resetPassword(email: string, otp: string, newPass: string): Promise<{ message: string }> {
+    const user = await this.usersModel.findOne({ email });
+    if (!user) throw new NotFoundException('User not found');
+    if (!user.reset_password_otp || !user.reset_password_otp_expires_at) throw new BadRequestException('Request expired or invalid. Please try again.');
+
+    if (new Date() > user.reset_password_otp_expires_at) {
+      throw new BadRequestException('OTP expired');
+    }
+
+    const isOtpValid = await bcrypt.compare(otp, user.reset_password_otp);
+    if (!isOtpValid) throw new BadRequestException('Invalid OTP');
+
+    const hashedNewPass = await this.hashString(newPass);
+
+    await this.usersModel.findByIdAndUpdate(user._id, {
+      password: hashedNewPass,
+      $unset: { reset_password_otp: '', reset_password_otp_expires_at: '' }
     });
 
     return { message: 'Password updated successfully' };

@@ -110,10 +110,6 @@
                 <span nz-icon nzType="check-circle" nzTheme="fill"></span> Verified
             </span>
             } @else {
-            <!-- <button nz-button nzType="primary" (click)="saveAddress()" [nzLoading]="isLoading()"
-                class="rounded-lg px-6 h-10 bg-[#1a6b3c] border-none hover:bg-[#0d3d22] font-semibold">
-                {{ phoneConfig().isPhoneVerificationOn ? 'Verify' : 'Save' }}
-            </button> -->
             <button (click)="handlePhoneAction()" [disabled]="isVerifyingPhone() || phoneValue().length < 5"
                 class="btn-primary flex items-center justify-center gap-2 px-6 h-10 text-[0.95rem] disabled:cursor-not-allowed font-semibold">
                 @if(isPhoneLoading()) {

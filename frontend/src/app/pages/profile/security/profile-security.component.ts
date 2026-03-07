@@ -6,14 +6,16 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import { NzIconModule } from 'ng-zorro-antd/icon';
 import { AuthService } from '../../../core/services/auth.service';
+import { OtpVerificationComponent } from '../../../shared/components/otp-verification/otp-verification.component';
 
 @Component({
   selector: 'app-profile-security',
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule, FormsModule,
-    NzButtonModule, NzInputModule, NzFormModule, NzModalModule
+    NzButtonModule, NzInputModule, NzFormModule, NzModalModule, NzIconModule, OtpVerificationComponent
   ],
   providers: [NzMessageService],
   templateUrl: './profile-security.component.html'
@@ -24,9 +26,14 @@ export class ProfileSecurityComponent {
   msg = inject(NzMessageService);
 
   isLoading = signal(false);
+  isResending = signal(false);
   pwdStep = signal(1);
   pwdForm: FormGroup;
   otpValue = '';
+
+  showCurrentPassword = signal(false);
+  showNewPassword = signal(false);
+  showConfirmPassword = signal(false);
 
   constructor() {
     this.pwdForm = this.fb.group({
@@ -57,18 +64,34 @@ export class ProfileSecurityComponent {
     });
   }
 
-  finalizePasswordReset(): void {
-    if (!this.otpValue || this.otpValue.length !== 6) return;
+  resendOtp(): void {
+    const currentPass = this.pwdForm.value.current;
+    if (!currentPass) return;
+
+    this.isResending.set(true);
+    this.auth.initChangePassword(currentPass).subscribe({
+      next: (res) => {
+        this.msg.success('A new OTP has been sent to your email.');
+        this.isResending.set(false);
+      },
+      error: (e) => {
+        this.msg.error(e.error?.message || 'Failed to resend OTP');
+        this.isResending.set(false);
+      }
+    });
+  }
+
+  finalizePasswordReset(otpValue: string): void {
+    if (!otpValue || otpValue.length !== 6) return;
 
     this.isLoading.set(true);
     const newPass = this.pwdForm.value.new;
 
-    this.auth.completeChangePassword(this.otpValue, newPass).subscribe({
+    this.auth.completeChangePassword(otpValue, newPass).subscribe({
       next: (res) => {
         this.msg.success(res.message);
         this.pwdStep.set(1);
         this.pwdForm.reset();
-        this.otpValue = '';
         this.isLoading.set(false);
       },
       error: (e) => {

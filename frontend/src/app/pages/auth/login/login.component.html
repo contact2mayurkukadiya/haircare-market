@@ -10,10 +10,22 @@
       </div>
       <div class="form-group">
         <label>Password</label>
-        <input type="password" [(ngModel)]="password" name="password" placeholder="••••••••" required class="form-input">
+        <div class="relative">
+          <input [type]="showPassword() ? 'text' : 'password'" [(ngModel)]="password" name="password"
+            placeholder="••••••••" required class="form-input w-full !pr-12">
+          <button type="button"
+            class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+            (click)="showPassword.set(!showPassword())">
+            <span nz-icon [nzType]="showPassword() ? 'eye' : 'eye-invisible'" class="text-xl"></span>
+          </button>
+        </div>
+        <div class="flex justify-end mt-2">
+          <a routerLink="/auth/forgot-password"
+            class="text-sm text-[#1a6b3c] hover:text-[#0d3d22] font-semibold hover:underline">Forgot password?</a>
+        </div>
       </div>
       @if (error()) {
-        <div class="form-error">{{ error() }}</div>
+      <div class="form-error">{{ error() }}</div>
       }
       <button type="submit" class="btn-primary submit-btn" [disabled]="loading()">
         @if (loading()) { Signing in... } @else { Sign In }

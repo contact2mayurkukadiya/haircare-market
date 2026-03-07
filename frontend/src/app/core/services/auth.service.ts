@@ -109,6 +109,14 @@ export class AuthService {
         return this.api.post('/users/change-password/complete', { otp, newPassword });
     }
 
+    forgotPassword(email: string): Observable<{ message: string }> {
+        return this.api.post('/users/forgot-password', { email });
+    }
+
+    resetPassword(email: string, otp: string, newPassword: string): Observable<{ message: string }> {
+        return this.api.post('/users/reset-password', { email, otp, newPassword });
+    }
+
     register(data: { name: string; email: string; password: string }): Observable<{ message: string }> {
         return this.api.post<{ message: string }>('/users', data);
     }

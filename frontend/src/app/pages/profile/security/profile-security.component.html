@@ -4,20 +4,41 @@
 <form [formGroup]="pwdForm" class="max-w-md space-y-6">
     <div>
         <label class="block text-sm font-semibold text-gray-600 mb-1.5">Current Password</label>
-        <input type="password" formControlName="current" placeholder="••••••••"
-            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-[#1a6b3c] focus:ring-4 focus:ring-[#1a6b3c]/10 transition-all">
+        <div class="relative">
+            <input [type]="showCurrentPassword() ? 'text' : 'password'" formControlName="current" placeholder="••••••••"
+                class="w-full px-4 py-2.5 !pr-12 rounded-lg border border-gray-300 text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-[#1a6b3c] focus:ring-4 focus:ring-[#1a6b3c]/10 transition-all">
+            <button type="button"
+                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                (click)="showCurrentPassword.set(!showCurrentPassword())">
+                <span nz-icon [nzType]="showCurrentPassword() ? 'eye' : 'eye-invisible'" class="text-xl"></span>
+            </button>
+        </div>
     </div>
 
     <div>
         <label class="block text-sm font-semibold text-gray-600 mb-1.5">New Password</label>
-        <input type="password" formControlName="new" placeholder="Min 8 characters"
-            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-[#1a6b3c] focus:ring-4 focus:ring-[#1a6b3c]/10 transition-all">
+        <div class="relative">
+            <input [type]="showNewPassword() ? 'text' : 'password'" formControlName="new" placeholder="Min 8 characters"
+                class="w-full px-4 py-2.5 !pr-12 rounded-lg border border-gray-300 text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-[#1a6b3c] focus:ring-4 focus:ring-[#1a6b3c]/10 transition-all">
+            <button type="button"
+                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                (click)="showNewPassword.set(!showNewPassword())">
+                <span nz-icon [nzType]="showNewPassword() ? 'eye' : 'eye-invisible'" class="text-xl"></span>
+            </button>
+        </div>
     </div>
 
     <div>
         <label class="block text-sm font-semibold text-gray-600 mb-1.5">Re-enter New Password</label>
-        <input type="password" formControlName="confirm" placeholder="••••••••"
-            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-[#1a6b3c] focus:ring-4 focus:ring-[#1a6b3c]/10 transition-all">
+        <div class="relative">
+            <input [type]="showConfirmPassword() ? 'text' : 'password'" formControlName="confirm" placeholder="••••••••"
+                class="w-full px-4 py-2.5 !pr-12 rounded-lg border border-gray-300 text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-[#1a6b3c] focus:ring-4 focus:ring-[#1a6b3c]/10 transition-all">
+            <button type="button"
+                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                (click)="showConfirmPassword.set(!showConfirmPassword())">
+                <span nz-icon [nzType]="showConfirmPassword() ? 'eye' : 'eye-invisible'" class="text-xl"></span>
+            </button>
+        </div>
     </div>
 
     <button type="button" class="btn-primary w-full justify-center mt-4 py-2.5 text-[0.95rem]"
@@ -26,25 +47,7 @@
     </button>
 </form>
 
-<!-- OTP Modal -->
-<nz-modal [nzVisible]="pwdStep() === 2" nzTitle="Verify OTP" (nzOnCancel)="pwdStep.set(1)" [nzFooter]="null"
-    [nzCentered]="true">
-    <ng-container *nzModalContent>
-        <div class="text-center py-4">
-            <div class="mb-4 text-4xl">🔐</div>
-            <p class="text-gray-600 mb-6 font-medium">Please enter the 6-digit code sent to your email</p>
-
-            <input
-                class="w-full text-center text-3xl tracking-[0.5em] font-bold border border-gray-300 rounded-xl py-3 text-gray-800 
-                          focus:outline-none focus:border-[#1a6b3c] focus:ring-4 focus:ring-[#1a6b3c]/10 transition-all mb-8 placeholder:text-gray-200"
-                [(ngModel)]="otpValue" maxlength="6" placeholder="------">
-
-            <button nz-button nzType="primary"
-                class="w-full h-11 rounded-lg bg-[#1a6b3c] hover:bg-[#0d3d22] border-none font-bold"
-                [nzLoading]="isLoading()" (click)="finalizePasswordReset()"
-                [disabled]="!otpValue || otpValue.length < 6">
-                Verify & Change Password
-            </button>
-        </div>
-    </ng-container>
-</nz-modal>
+<!-- Shared OTP Modal -->
+<app-otp-verification [visible]="pwdStep() === 2" [isLoading]="isLoading()" [isResending]="isResending()"
+    (otpSubmitted)="finalizePasswordReset($event)" (resendRequested)="resendOtp()" (modalClosed)="pwdStep.set(1)">
+</app-otp-verification>

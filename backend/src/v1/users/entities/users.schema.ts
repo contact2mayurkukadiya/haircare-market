@@ -54,6 +54,12 @@ class Users implements IUser {
 
   @Prop()
   phone_otp_expires_at?: Date;
+
+  @Prop()
+  reset_password_otp?: string;
+
+  @Prop()
+  reset_password_otp_expires_at?: Date;
 }
 
 export const UsersSchema = SchemaFactory.createForClass(Users);

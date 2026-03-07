@@ -2,7 +2,7 @@
 import { Controller, Get, Post, Body, Put, Param, Delete, UseGuards, Request, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, Patch, HttpStatus, ParseFilePipeBuilder } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiConsumes, ApiBody } from '@nestjs/swagger';
 
-import { CreateUserDto, UpdateUserDto, SendOtpDto, VerifyOtpDto, SendPhoneOtpDto, VerifyPhoneOtpDto, SavePhoneDto } from './dto';
+import { CreateUserDto, UpdateUserDto, SendOtpDto, VerifyOtpDto, SendPhoneOtpDto, VerifyPhoneOtpDto, SavePhoneDto, ForgotPasswordDto, ResetPasswordDto } from './dto';
 import { UsersService } from './users.service';
 import type { IUserPreview } from 'src/interfaces';
 import { JwtAuthGuard } from '../guards';
@@ -102,6 +102,20 @@ export class UsersController {
     @Body() dto: CompleteChangePasswordDto
   ): Promise<{ message: string }> {
     return this.usersService.completeChangePassword(req.user.sub, dto.otp, dto.newPassword);
+  }
+
+  // Forgot Password (Unauthenticated)
+  @Post('forgot-password')
+  @ApiOperation({ summary: 'Request password reset OTP' })
+  async forgotPassword(@Body() dto: ForgotPasswordDto): Promise<{ message: string }> {
+    return this.usersService.forgotPassword(dto.email);
+  }
+
+  // Reset Password (Unauthenticated)
+  @Post('reset-password')
+  @ApiOperation({ summary: 'Reset password using OTP' })
+  async resetPassword(@Body() dto: ResetPasswordDto): Promise<{ message: string }> {
+    return this.usersService.resetPassword(dto.email, dto.otp, dto.newPassword);
   }
 
 

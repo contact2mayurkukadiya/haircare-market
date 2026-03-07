@@ -3,11 +3,12 @@ import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import { NzIconModule } from 'ng-zorro-antd/icon';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [RouterLink, FormsModule],
+  imports: [RouterLink, FormsModule, NzIconModule],
   providers: [NzMessageService],
   templateUrl: './login.component.html',
   styleUrl: '../auth.shared.scss',
@@ -19,6 +20,7 @@ export class LoginComponent {
   password = '';
   loading = signal(false);
   error = signal('');
+  showPassword = signal(false);
 
   onSubmit(): void {
     if (!this.email || !this.password) return;
