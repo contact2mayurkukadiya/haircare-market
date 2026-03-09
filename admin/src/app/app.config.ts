@@ -9,6 +9,7 @@ import { FormsModule } from '@angular/forms';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideNzIcons } from 'ng-zorro-antd/icon';
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { IconDefinition } from '@ant-design/icons-angular';
 import {
   StepForwardOutline,
@@ -23,7 +24,17 @@ import {
   PictureOutline,
   EditOutline,
   DeleteOutline,
-  AppstoreOutline
+  AppstoreOutline,
+  CreditCardOutline,
+  AlipayCircleOutline,
+  AreaChartOutline,
+  QrcodeOutline,
+  EyeOutline,
+  EyeInvisibleOutline,
+  OrderedListOutline,
+  HistoryOutline,
+  DashboardOutline,
+  ArrowUpOutline
 } from '@ant-design/icons-angular/icons';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 
@@ -42,7 +53,17 @@ const icons: IconDefinition[] = [
   PictureOutline,
   EditOutline,
   DeleteOutline,
-  AppstoreOutline
+  AppstoreOutline,
+  EyeOutline,
+  EyeInvisibleOutline,
+  CreditCardOutline,
+  AlipayCircleOutline,
+  AreaChartOutline,
+  QrcodeOutline,
+  OrderedListOutline,
+  HistoryOutline,
+  DashboardOutline,
+  ArrowUpOutline
 ];
 
 export const appConfig: ApplicationConfig = {
@@ -53,7 +74,8 @@ export const appConfig: ApplicationConfig = {
     importProvidersFrom(FormsModule),
     provideAnimationsAsync(),
     provideHttpClient(withInterceptors([authInterceptor])),
-    provideNzIcons(icons)
+    provideNzIcons(icons),
+    provideCharts(withDefaultRegisterables())
   ]
 };
 

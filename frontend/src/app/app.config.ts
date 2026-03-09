@@ -34,7 +34,8 @@ import {
   EnvironmentOutline,
   PhoneOutline,
   EyeOutline,
-  EyeInvisibleOutline
+  EyeInvisibleOutline,
+  AlipayCircleOutline
 } from '@ant-design/icons-angular/icons';
 registerLocaleData(en);
 
@@ -62,7 +63,8 @@ const icons: IconDefinition[] = [
   EnvironmentOutline,
   PhoneOutline,
   EyeOutline,
-  EyeInvisibleOutline
+  EyeInvisibleOutline,
+  AlipayCircleOutline,
 ];
 
 export const appConfig: ApplicationConfig = {

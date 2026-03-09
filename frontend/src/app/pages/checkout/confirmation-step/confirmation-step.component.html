@@ -1,0 +1,9 @@
+<div class="step-container">
+    <nz-result nzStatus="success" nzTitle="Order Placed Successfully!"
+        [nzSubTitle]="'Your order ID is: ' + checkout.state$.value.orderId + '. We will email you the order confirmation and tracking details shortly.'">
+        <div nz-result-extra>
+            <button nz-button nzType="primary" routerLink="/profile/orders">View Orders in Profile</button>
+            <button nz-button nzType="default" routerLink="/products">Continue Shopping</button>
+        </div>
+    </nz-result>
+</div>

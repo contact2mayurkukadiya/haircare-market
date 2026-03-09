@@ -1,0 +1,70 @@
+<div class="step-container">
+    <h3>Select Payment Method</h3>
+    <p class="subtitle">Choose how you want to pay for this order.</p>
+
+    <div *ngIf="loading" class="loading-state">
+        <nz-spin nzSimple nzSize="large"></nz-spin>
+    </div>
+
+    <div *ngIf="error" class="error-msg">
+        {{ error }}
+    </div>
+
+    <div *ngIf="!loading && !error" class="gateways-list">
+        <div *ngIf="gateways.length === 0" class="empty-state">
+            <span nz-icon nzType="warning" nzTheme="outline" class="icon"></span>
+            <p>No payment gateways are currently available. Please contact support.</p>
+        </div>
+
+        <!-- Stripe Option -->
+        <div class="gateway-option" *ngIf="getGateway('stripe')" [class.selected]="selectedGateway === 'stripe'"
+            (click)="selectGateway('stripe')">
+            <div class="gw-brand">
+                <span nz-icon nzType="credit-card" nzTheme="outline" class="brand-icon purple"></span>
+                <div class="gw-info">
+                    <h4>Credit / Debit Card</h4>
+                    <p>Secure payment via Stripe</p>
+                </div>
+            </div>
+            <div class="gw-radio">
+                <div class="radio-circle" [class.active]="selectedGateway === 'stripe'"></div>
+            </div>
+        </div>
+
+        <!-- PayPal Option -->
+        <div class="gateway-option" *ngIf="getGateway('paypal')" [class.selected]="selectedGateway === 'paypal'"
+            (click)="selectGateway('paypal')">
+            <div class="gw-brand">
+                <span nz-icon nzType="alipay-circle" nzTheme="outline" class="brand-icon blue"></span>
+                <div class="gw-info">
+                    <h4>PayPal</h4>
+                    <p>Pay with your PayPal account</p>
+                </div>
+            </div>
+            <div class="gw-radio">
+                <div class="radio-circle" [class.active]="selectedGateway === 'paypal'"></div>
+            </div>
+        </div>
+
+        <!-- UPI Option -->
+        <div class="gateway-option" *ngIf="getGateway('upi')" [class.selected]="selectedGateway === 'upi'"
+            (click)="selectGateway('upi')">
+            <div class="gw-brand">
+                <span nz-icon nzType="qrcode" nzTheme="outline" class="brand-icon orange"></span>
+                <div class="gw-info">
+                    <h4>UPI</h4>
+                    <p>Direct bank transfer (India)</p>
+                </div>
+            </div>
+            <div class="gw-radio">
+                <div class="radio-circle" [class.active]="selectedGateway === 'upi'"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="step-actions mt-8">
+        <button nz-button type="button" nzSize="large" (click)="goBack()">Back to Shipping</button>
+        <button nz-button nzType="primary" nzSize="large" class="btn-accent" [disabled]="!selectedGateway"
+            (click)="continue()">Continue</button>
+    </div>
+</div>

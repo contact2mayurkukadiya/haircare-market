@@ -1,0 +1,140 @@
+.step-container {
+  max-width: 600px;
+  
+  h3 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+  
+  .subtitle {
+    color: #64748b;
+    margin-bottom: 2rem;
+  }
+}
+
+.loading-state {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 0;
+}
+
+.error-msg {
+  color: #ef4444;
+  background: #fef2f2;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+  margin-bottom: 1.5rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px dashed #cbd5e1;
+
+  .icon {
+    font-size: 2rem;
+    color: #eab308;
+    margin-bottom: 1rem;
+  }
+  p {
+    color: #475569;
+  }
+}
+
+.gateways-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.gateway-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+
+  &:hover {
+    border-color: #cbd5e1;
+    background: #f8fafc;
+  }
+
+  &.selected {
+    border-color: #6366f1;
+    background: #eef2ff;
+  }
+
+  .gw-brand {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+
+    .brand-icon {
+      font-size: 2rem;
+      &.purple { color: #6366f1; }
+      &.blue { color: #0ea5e9; }
+      &.orange { color: #f97316; }
+    }
+
+    .gw-info {
+      h4 {
+        margin: 0 0 0.25rem 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #0f172a;
+      }
+      p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: #64748b;
+      }
+    }
+  }
+
+  .gw-radio {
+    .radio-circle {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid #cbd5e1;
+      position: relative;
+      transition: all 0.2s ease;
+
+      &.active {
+        border-color: #6366f1;
+        &::after {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 10px;
+          height: 10px;
+          background: #6366f1;
+          border-radius: 50%;
+        }
+      }
+    }
+  }
+}
+
+.step-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #f1f5f9;
+
+  button {
+    border-radius: 8px;
+    font-weight: 500;
+  }
+}

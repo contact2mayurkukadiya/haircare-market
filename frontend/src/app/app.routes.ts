@@ -8,6 +8,7 @@ export const routes: Routes = [
     { path: 'products', loadComponent: () => import('./pages/products/products.component').then(m => m.ProductsComponent) },
     { path: 'products/:id', loadComponent: () => import('./pages/product-detail/product-detail.component').then(m => m.ProductDetailComponent) },
     { path: 'cart', loadComponent: () => import('./pages/cart/cart.component').then(m => m.CartComponent) },
+    { path: 'checkout', canActivate: [authGuard], loadComponent: () => import('./pages/checkout/checkout.component').then(m => m.CheckoutComponent) },
     { path: 'auth/login', loadComponent: () => import('./pages/auth/login/login.component').then(m => m.LoginComponent) },
     { path: 'auth/register', loadComponent: () => import('./pages/auth/register/register.component').then(m => m.RegisterComponent) },
     { path: 'auth/verify-otp', loadComponent: () => import('./pages/auth/verify-otp/verify-otp.component').then(m => m.VerifyOtpComponent) },
@@ -33,6 +34,10 @@ export const routes: Routes = [
             {
                 path: 'payments',
                 loadComponent: () => import('./pages/profile/payments/profile-payments.component').then(m => m.ProfilePaymentsComponent)
+            },
+            {
+                path: 'orders',
+                loadComponent: () => import('./pages/profile/orders/profile-orders.component').then(m => m.ProfileOrdersComponent)
             }
         ]
     },

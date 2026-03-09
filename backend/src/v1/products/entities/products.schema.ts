@@ -5,7 +5,7 @@ import { IProduct } from 'src/interfaces';
 export type ProductsDocument = Products & Document<string>;
 
 @Schema({ timestamps: true })
-class Products implements Omit<IProduct, 'category'> {
+export class Products implements Omit<IProduct, 'category'> {
   @Prop({ required: true })
   name!: string;
 

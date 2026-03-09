@@ -6,6 +6,10 @@ import { ProductListComponent } from './features/products/product-list/product-l
 import { ProductFormComponent } from './features/products/product-form/product-form.component';
 import { CategoryListComponent } from './features/categories/category-list/category-list.component';
 import { CategoryFormComponent } from './features/categories/category-form/category-form.component';
+import { PaymentGatewaysComponent } from './features/payment-gateways/payment-gateways.component';
+import { TransactionsComponent } from './features/transactions/transactions.component';
+import { DashboardComponent } from './features/dashboard/dashboard.component';
+import { OrdersComponent } from './features/orders/orders.component';
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
@@ -14,13 +18,17 @@ export const routes: Routes = [
         component: AdminLayoutComponent,
         canActivate: [authGuard],
         children: [
-            { path: '', redirectTo: 'products', pathMatch: 'full' },
+            { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+            { path: 'dashboard', component: DashboardComponent },
             { path: 'products', component: ProductListComponent },
             { path: 'products/new', component: ProductFormComponent },
             { path: 'products/:id/edit', component: ProductFormComponent },
             { path: 'categories', component: CategoryListComponent },
             { path: 'categories/new', component: CategoryFormComponent },
             { path: 'categories/:id/edit', component: CategoryFormComponent },
+            { path: 'orders', component: OrdersComponent },
+            { path: 'payment-gateways', component: PaymentGatewaysComponent },
+            { path: 'transactions', component: TransactionsComponent },
         ]
     },
     { path: '', redirectTo: 'admin', pathMatch: 'full' },

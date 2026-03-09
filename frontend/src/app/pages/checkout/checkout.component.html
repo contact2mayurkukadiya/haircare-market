@@ -1,0 +1,51 @@
+<div class="checkout-page container-main">
+    <h2>Secure Checkout</h2>
+
+    <div class="checkout-layout">
+
+        <div class="checkout-main">
+            <nz-steps [nzCurrent]="stepIndex" nzSize="small" class="mb-8">
+                <nz-step nzTitle="Shipping"></nz-step>
+                <nz-step nzTitle="Payment Method"></nz-step>
+                <nz-step nzTitle="Pay"></nz-step>
+                <nz-step nzTitle="Done"></nz-step>
+            </nz-steps>
+
+            <div class="step-content">
+                <!-- Render current step component dynamically based on state -->
+                <app-shipping-step *ngIf="currentStep === 1"></app-shipping-step>
+                <app-payment-step *ngIf="currentStep === 2"></app-payment-step>
+                <app-stripe-payment-step *ngIf="currentStep === 3"></app-stripe-payment-step>
+                <app-confirmation-step *ngIf="currentStep === 4"></app-confirmation-step>
+            </div>
+        </div>
+
+        <!-- Order Summary Sidebar (Hidden on Step 4 Confirmation) -->
+        <div class="checkout-sidebar" *ngIf="currentStep < 4">
+            <div class="summary-card">
+                <h3>Order Summary</h3>
+                <div class="summary-items">
+                    <div class="s-item" *ngFor="let item of cart.items()">
+                        <span class="s-name">{{ item.quantity }}x {{ item.product.name }}</span>
+                        <span class="s-price">{{ (item.product.price * item.quantity) | currency }}</span>
+                    </div>
+                </div>
+                <div class="summary-totals">
+                    <div class="s-row">
+                        <span>Subtotal</span>
+                        <span>{{ cart.total() | currency }}</span>
+                    </div>
+                    <div class="s-row">
+                        <span>Shipping</span>
+                        <span class="free-text">FREE</span>
+                    </div>
+                    <div class="s-row total">
+                        <span>Total</span>
+                        <span>{{ cart.total() | currency }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

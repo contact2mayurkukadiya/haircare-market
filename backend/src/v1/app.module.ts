@@ -13,6 +13,9 @@ import { LoggerMiddleware } from './middlewares';
 import { AdminModule } from './admin/admin.module';
 import { EmailModule } from './email/email.module';
 import { CategoriesModule } from './categories/categories.module';
+import { PaymentGatewayConfigsModule } from './payment-gateway-configs/payment-gateway-configs.module';
+import { OrdersModule } from './orders/orders.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -24,6 +27,9 @@ import { CategoriesModule } from './categories/categories.module';
     ProductsModule,
     AdminModule,
     CategoriesModule,
+    PaymentGatewayConfigsModule,
+    OrdersModule,
+    PaymentsModule,
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'uploads'),
       serveRoot: '/static',

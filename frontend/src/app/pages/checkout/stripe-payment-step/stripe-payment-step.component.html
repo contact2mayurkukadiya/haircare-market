@@ -1,0 +1,30 @@
+<div class="step-container">
+    <h3>Complete Payment</h3>
+    <p class="subtitle">Please enter your card details below. This is securely processed by Stripe.</p>
+
+    <div *ngIf="loading" class="loading-state">
+        <nz-spin nzSimple nzSize="large"></nz-spin>
+        <p class="mt-4 text-slate-500">Initializing secure payment...</p>
+    </div>
+
+    <div *ngIf="error && !loading" class="error-msg">
+        {{ error }}
+    </div>
+
+    <div [hidden]="loading">
+        <div class="stripe-container">
+            <div #paymentElement id="payment-element">
+                <!-- Stripe Elements injects iframe here -->
+            </div>
+        </div>
+
+        <div class="step-actions mt-8">
+            <button nz-button type="button" nzSize="large" (click)="goBack()" [disabled]="processing">Choose Another
+                Method</button>
+            <button nz-button nzType="primary" nzSize="large" class="btn-accent" [nzLoading]="processing"
+                [disabled]="loading || !!error" (click)="payNow()">
+                Pay {{ checkout.state$.value.orderTotal | currency }}
+            </button>
+        </div>
+    </div>
+</div>

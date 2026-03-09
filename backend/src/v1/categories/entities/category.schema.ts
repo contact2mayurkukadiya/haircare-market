@@ -5,7 +5,7 @@ import { ICategory } from 'src/interfaces';
 export type CategoriesDocument = Categories & Document<string>;
 
 @Schema({ timestamps: true })
-class Categories implements ICategory {
+export class Categories implements ICategory {
     @Prop({ required: true, unique: true })
     name!: string;
 

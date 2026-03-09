@@ -1,0 +1,11 @@
+.stats-row {
+  margin-top: 1rem;
+}
+
+.mt-6 {
+  margin-top: 1.5rem;
+}
+
+:host ::ng-deep .highcharts-container {
+  width: 100% !important;
+}

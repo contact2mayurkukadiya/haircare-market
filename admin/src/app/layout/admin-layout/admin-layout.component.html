@@ -1,61 +1,75 @@
 <nz-layout class="min-h-screen bg-slate-50">
-    <nz-sider nzCollapsible [(nzCollapsed)]="isCollapsed" nzWidth="256px" nzTheme="light" class="shadow-md z-10">
-      <div class="h-16 flex items-center justify-center p-4 border-b border-gray-100 bg-white">
-        @if (!isCollapsed) {
-          <h1 class="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent m-0 transition-all duration-300">
-            Haircare Admin
-          </h1>
-        } @else {
-          <h1 class="text-xl font-bold text-blue-600 m-0">HA</h1>
+  <nz-sider nzCollapsible [(nzCollapsed)]="isCollapsed" nzWidth="256px" nzTheme="light" class="shadow-md z-10">
+    <div class="h-16 flex items-center justify-center p-4 border-b border-gray-100 bg-white">
+      @if (!isCollapsed) {
+      <h1
+        class="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent m-0 transition-all duration-300">
+        Haircare Admin
+      </h1>
+      } @else {
+      <h1 class="text-xl font-bold text-blue-600 m-0">HA</h1>
+      }
+    </div>
+
+    <ul nz-menu nzMode="inline" class="bg-transparent border-r-0 pt-4">
+      <li nz-menu-item nzMatchRouter routerLink="/admin/dashboard">
+        <span nz-icon nzType="dashboard"></span>
+        <span>Dashboard</span>
+      </li>
+      <li nz-menu-item nzMatchRouter routerLink="/admin/products">
+        <span nz-icon nzType="shopping"></span>
+        <span>Products</span>
+      </li>
+      <li nz-menu-item nzMatchRouter routerLink="/admin/categories">
+        <span nz-icon nzType="appstore"></span>
+        <span>Categories</span>
+      </li>
+      <li nz-menu-item nzMatchRouter routerLink="/admin/orders">
+        <span nz-icon nzType="ordered-list"></span>
+        <span>Orders</span>
+      </li>
+      <li nz-menu-item nzMatchRouter routerLink="/admin/payment-gateways">
+        <span nz-icon nzType="credit-card"></span>
+        <span>Payment Gateways</span>
+      </li>
+      <li nz-menu-item nzMatchRouter routerLink="/admin/transactions">
+        <span nz-icon nzType="history"></span>
+        <span>Payment Logs</span>
+      </li>
+    </ul>
+  </nz-sider>
+
+  <nz-layout>
+    <nz-header class="bg-slate-900 px-6 flex items-center justify-between shadow-sm z-0">
+      <div class="flex items-center">
+        <span class="trigger !text-white text-xl cursor-pointer hover:!text-blue-200 transition-colors" nz-icon
+          [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'" (click)="isCollapsed = !isCollapsed"></span>
+      </div>
+
+      <div class="flex items-center">
+        @if (currentUser()) {
+        <a nz-dropdown [nzDropdownMenu]="userMenu"
+          class="flex items-center gap-3 hover:bg-slate-800 px-3 transition-colors">
+          <nz-avatar [nzText]="userInitials()" class="bg-blue-600"></nz-avatar>
+          <span class="font-medium text-white">{{ currentUser()?.name }}</span>
+          <span nz-icon nzType="down" class="text-xs text-blue-200"></span>
+        </a>
+
+        <nz-dropdown-menu #userMenu="nzDropdownMenu">
+          <ul nz-menu class="min-w-[150px] shadow-lg rounded-sm border border-gray-100">
+            <li nz-menu-item (click)="logout()" class="text-red-600 hover:text-red-700 hover:bg-red-50">
+              <span nz-icon nzType="logout"></span> Logout
+            </li>
+          </ul>
+        </nz-dropdown-menu>
         }
       </div>
-  
-      <ul nz-menu nzMode="inline" class="bg-transparent border-r-0 pt-4">
-        <li nz-menu-item nzMatchRouter routerLink="/admin/products">
-          <span nz-icon nzType="shopping"></span>
-          <span>Products</span>
-        </li>
-        <li nz-menu-item nzMatchRouter routerLink="/admin/categories">
-          <span nz-icon nzType="appstore"></span>
-          <span>Categories</span>
-        </li>
-      </ul>
-    </nz-sider>
-  
-    <nz-layout>
-      <nz-header class="bg-white px-6 flex items-center justify-between shadow-sm z-0">
-        <div class="flex items-center">
-            <span
-              class="trigger text-xl cursor-pointer hover:text-blue-500 transition-colors"
-              nz-icon
-              [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'"
-              (click)="isCollapsed = !isCollapsed"
-            ></span>
-        </div>
-        
-        <div class="flex items-center">
-            @if (currentUser()) {
-                <a nz-dropdown [nzDropdownMenu]="userMenu" class="flex items-center gap-3 hover:bg-gray-50 px-3 py-1 rounded-full transition-colors">
-                    <nz-avatar [nzText]="userInitials()" class="bg-blue-600"></nz-avatar>
-                    <span class="font-medium text-gray-700">{{ currentUser()?.name }}</span>
-                    <span nz-icon nzType="down" class="text-xs text-gray-400"></span>
-                </a>
-                
-                <nz-dropdown-menu #userMenu="nzDropdownMenu">
-                    <ul nz-menu class="min-w-[150px] shadow-lg rounded-sm border border-gray-100">
-                    <li nz-menu-item (click)="logout()" class="text-red-600 hover:text-red-700 hover:bg-red-50">
-                        <span nz-icon nzType="logout"></span> Logout
-                    </li>
-                    </ul>
-                </nz-dropdown-menu>
-            }
-        </div>
-      </nz-header>
-  
-      <nz-content class="p-6">
-        <div class="bg-white p-6 rounded-xl shadow-sm min-h-[calc(100vh-140px)]">
-            <router-outlet></router-outlet>
-        </div>
-      </nz-content>
-    </nz-layout>
+    </nz-header>
+
+    <nz-content class="p-6">
+      <div class="bg-white p-6 rounded-xl shadow-sm min-h-[calc(100vh-140px)]">
+        <router-outlet></router-outlet>
+      </div>
+    </nz-content>
   </nz-layout>
+</nz-layout>

@@ -5,7 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(V1Module);
+  const app = await NestFactory.create(V1Module, { rawBody: true });
 
   const config = app.get(ConfigService);
   const PORT: number = config.get<number>('port') || 3000;

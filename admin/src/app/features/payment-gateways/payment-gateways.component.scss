@@ -1,0 +1,130 @@
+.page-header {
+  margin-bottom: 2rem;
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #1e293b;
+  }
+  p {
+    color: #64748b;
+  }
+}
+
+.loading-state {
+  display: flex;
+  justify-content: center;
+  padding: 4rem;
+}
+
+.gateways-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1px));
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.gateway-card {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+  transition: all 0.3s ease;
+  border: 1px solid #e2e8f0;
+
+  &.enabled {
+    border-color: #3b82f6;
+    box-shadow: 0 10px 15px -3px rgb(59 130 246 / 0.1);
+  }
+
+  ::ng-deep .ant-card-body {
+    padding: 0;
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #f1f5f9;
+    background: #f8fafc;
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+
+      .brand-icon {
+        font-size: 1.75rem;
+        color: #6366f1; // Stripe purple-ish default
+      }
+
+      h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #0f172a;
+      }
+    }
+  }
+
+  .card-body {
+    padding: 1.5rem;
+
+    .description {
+      color: #64748b;
+      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+    }
+
+    .alert-info {
+      background: #e0f2fe;
+      color: #0369a1;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      border: 1px solid #bae6fd;
+    }
+  }
+}
+
+.creds-form {
+  background: white;
+  border-radius: 8px;
+
+  .form-group {
+    margin-bottom: 1.25rem;
+
+    label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 500;
+      color: #334155;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+
+      .badge-secure {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #059669;
+        background: #d1fae5;
+        padding: 0.15rem 0.5rem;
+        border-radius: 999px;
+      }
+    }
+
+    input {
+      border-radius: 6px;
+      padding: 0.5rem 0.75rem;
+    }
+  }
+
+  .pwd-toggle {
+    cursor: pointer;
+    color: #94a3b8;
+    &:hover {
+      color: #64748b;
+    }
+  }
+}

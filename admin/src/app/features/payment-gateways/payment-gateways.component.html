@@ -1,0 +1,117 @@
+<div class="page-header">
+    <h2>Payment Gateways</h2>
+    <p>Manage supported payment methods and API credentials. Credentials are AES-encrypted before storage.</p>
+</div>
+
+<div *ngIf="loading" class="loading-state">
+    <nz-spin nzSimple nzSize="large"></nz-spin>
+</div>
+
+<div class="gateways-grid" *ngIf="!loading">
+
+    <!-- Stripe Card -->
+    <nz-card class="gateway-card" [class.enabled]="getGatewayConfig('stripe').enabled">
+        <div class="card-header">
+            <div class="brand">
+                <span nz-icon nzType="credit-card" nzTheme="outline" class="brand-icon"></span>
+                <h3>Stripe</h3>
+                <nz-badge [nzStatus]="getGatewayConfig('stripe').enabled ? 'success' : 'default'"
+                    [nzText]="getGatewayConfig('stripe').enabled ? 'Active' : 'Disabled'"></nz-badge>
+            </div>
+            <div>
+                <nz-switch [(ngModel)]="getGatewayConfig('stripe').enabled"
+                    (ngModelChange)="toggleGateway(getGatewayConfig('stripe'))"
+                    [nzLoading]="saving['stripe']"></nz-switch>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <p class="description">Accept credit and debit cards globally via Stripe's API.</p>
+
+            <div class="creds-form">
+                <div class="form-group">
+                    <label>Publishable Key</label>
+                    <nz-input-group [nzSuffix]="publishableSuffixTemplate">
+                        <input [type]="showStripePublishableKey ? 'text' : 'password'" nz-input
+                            placeholder="pk_test_..." [(ngModel)]="stripeCreds.publishableKey" />
+                    </nz-input-group>
+                    <ng-template #publishableSuffixTemplate>
+                        <span nz-icon [nzType]="showStripePublishableKey ? 'eye-invisible' : 'eye'"
+                            (click)="showStripePublishableKey = !showStripePublishableKey" class="pwd-toggle"></span>
+                    </ng-template>
+                </div>
+
+                <div class="form-group">
+                    <label>Secret Key <span class="badge-secure">Encrypted in DB</span></label>
+                    <nz-input-group [nzSuffix]="suffixTemplate">
+                        <input [type]="showStripeSecret ? 'text' : 'password'" nz-input placeholder="sk_test_..."
+                            [(ngModel)]="stripeCreds.secretKey" />
+                    </nz-input-group>
+                    <ng-template #suffixTemplate>
+                        <span nz-icon [nzType]="showStripeSecret ? 'eye-invisible' : 'eye'"
+                            (click)="showStripeSecret = !showStripeSecret" class="pwd-toggle"></span>
+                    </ng-template>
+                </div>
+
+                <div class="form-group">
+                    <label>Webhook Secret <span class="badge-secure">Encrypted in DB</span></label>
+                    <nz-input-group [nzSuffix]="webhookSuffixTemplate">
+                        <input [type]="showStripeWebhookSecret ? 'text' : 'password'" nz-input placeholder="whsec_..."
+                            [(ngModel)]="stripeCreds.webhookSecret" />
+                    </nz-input-group>
+                    <ng-template #webhookSuffixTemplate>
+                        <span nz-icon [nzType]="showStripeWebhookSecret ? 'eye-invisible' : 'eye'"
+                            (click)="showStripeWebhookSecret = !showStripeWebhookSecret" class="pwd-toggle"></span>
+                    </ng-template>
+                </div>
+
+                <button nz-button nzType="primary" [nzLoading]="saving['stripe']" (click)="saveStripeCreds()">Save
+                    Stripe Credentials</button>
+            </div>
+        </div>
+    </nz-card>
+
+
+    <!-- PayPal Card (Coming Soon / UI Only) -->
+    <nz-card class="gateway-card" [class.enabled]="getGatewayConfig('paypal').enabled">
+        <div class="card-header">
+            <div class="brand">
+                <span nz-icon nzType="alipay-circle" nzTheme="outline" class="brand-icon" style="color:#0079C1"></span>
+                <h3>PayPal</h3>
+                <nz-badge [nzStatus]="getGatewayConfig('paypal').enabled ? 'success' : 'default'"
+                    [nzText]="getGatewayConfig('paypal').enabled ? 'Active' : 'Disabled'"></nz-badge>
+            </div>
+            <div>
+                <nz-switch [(ngModel)]="getGatewayConfig('paypal').enabled"
+                    (ngModelChange)="toggleGateway(getGatewayConfig('paypal'))"
+                    [nzLoading]="saving['paypal']"></nz-switch>
+            </div>
+        </div>
+        <div class="card-body">
+            <p class="description">Accept payments directly from PayPal accounts.</p>
+            <div class="alert-info">PayPal integration will be implemented in a future update.</div>
+        </div>
+    </nz-card>
+
+
+    <!-- UPI Card (Coming Soon / UI Only) -->
+    <nz-card class="gateway-card" [class.enabled]="getGatewayConfig('upi').enabled">
+        <div class="card-header">
+            <div class="brand">
+                <span nz-icon nzType="qrcode" nzTheme="outline" class="brand-icon" style="color:#f97316"></span>
+                <h3>UPI</h3>
+                <nz-badge [nzStatus]="getGatewayConfig('upi').enabled ? 'success' : 'default'"
+                    [nzText]="getGatewayConfig('upi').enabled ? 'Active' : 'Disabled'"></nz-badge>
+            </div>
+            <div>
+                <nz-switch [(ngModel)]="getGatewayConfig('upi').enabled"
+                    (ngModelChange)="toggleGateway(getGatewayConfig('upi'))" [nzLoading]="saving['upi']"></nz-switch>
+            </div>
+        </div>
+        <div class="card-body">
+            <p class="description">Accept direct bank transfers via UPI (India).</p>
+            <div class="alert-info">UPI integration will be implemented in a future update.</div>
+        </div>
+    </nz-card>
+
+</div>

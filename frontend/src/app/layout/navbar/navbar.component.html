@@ -62,9 +62,15 @@
             <span class="ml-2">My Profile</span>
           </li>
 
+          <!-- Option 3: Your Orders -->
+          <li nz-menu-item routerLink="/profile/orders">
+            <span nz-icon nzType="shopping"></span>
+            <span class="ml-2">Your Orders</span>
+          </li>
+
           <li nz-menu-divider></li>
 
-          <!-- Option 3: Logout -->
+          <!-- Option 4: Logout -->
           <li nz-menu-item (click)="auth.logout()" class="text-red-600 hover:text-red-700 hover:bg-red-50">
             <span nz-icon nzType="logout"></span>
             <span class="ml-2">Logout</span>

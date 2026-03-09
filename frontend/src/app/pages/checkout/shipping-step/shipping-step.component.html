@@ -1,0 +1,56 @@
+<div class="step-container">
+    <h3>Shipping Details</h3>
+    <p class="subtitle">Where should we send your order?</p>
+
+    <form nz-form [formGroup]="shippingForm" (ngSubmit)="continue()" nzLayout="vertical">
+        <nz-form-item>
+            <nz-form-label nzRequired>Street Address</nz-form-label>
+            <nz-form-control nzErrorTip="Please enter your street address">
+                <input nz-input formControlName="street" placeholder="123 Beauty Lane, Apt 4" nzSize="large" />
+            </nz-form-control>
+        </nz-form-item>
+
+        <div nz-row [nzGutter]="16">
+            <div nz-col [nzSpan]="12">
+                <nz-form-item>
+                    <nz-form-label nzRequired>City</nz-form-label>
+                    <nz-form-control nzErrorTip="City is required">
+                        <input nz-input formControlName="city" placeholder="New York" nzSize="large" />
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+            <div nz-col [nzSpan]="12">
+                <nz-form-item>
+                    <nz-form-label nzRequired>State / Province</nz-form-label>
+                    <nz-form-control nzErrorTip="State is required">
+                        <input nz-input formControlName="state" placeholder="NY" nzSize="large" />
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+        </div>
+
+        <div nz-row [nzGutter]="16">
+            <div nz-col [nzSpan]="12">
+                <nz-form-item>
+                    <nz-form-label nzRequired>ZIP / Postal Code</nz-form-label>
+                    <nz-form-control nzErrorTip="ZIP code is required">
+                        <input nz-input formControlName="zip" placeholder="10001" nzSize="large" />
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+            <div nz-col [nzSpan]="12">
+                <nz-form-item>
+                    <nz-form-label nzRequired>Country</nz-form-label>
+                    <nz-form-control nzErrorTip="Country is required">
+                        <input nz-input formControlName="country" placeholder="United States" nzSize="large" />
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+        </div>
+
+        <div class="step-actions">
+            <button nz-button type="button" nzSize="large" routerLink="/cart">Return to Cart</button>
+            <button nz-button nzType="primary" nzSize="large" class="btn-accent">Continue to Payment</button>
+        </div>
+    </form>
+</div>

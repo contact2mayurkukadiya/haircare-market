@@ -28,5 +28,6 @@ import { ProductsModule } from '../products/products.module';
     ],
     controllers: [AdminController],
     providers: [AdminService, AdminLocalStrategy, AdminJwtStrategy, AdminAuthGuard],
+    exports: [AdminAuthGuard, AdminJwtStrategy, JwtModule],
 })
 export class AdminModule { }

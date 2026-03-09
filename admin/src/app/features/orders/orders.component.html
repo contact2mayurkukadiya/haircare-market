@@ -1,0 +1,37 @@
+<div class="page-header">
+    <h2>All Orders</h2>
+    <p>Manage store orders and customer details.</p>
+</div>
+
+<nz-card nzTitle="Orders List" class="mt-6">
+    <nz-table #ordersTable [nzData]="orders" [nzLoading]="loading" [nzFrontPagination]="true" [nzPageSize]="10">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Customer</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Method</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let order of ordersTable.data">
+                <td>{{ order.createdAt | date:'short' }}</td>
+                <td>
+                    <div *ngIf="order.userId">
+                        <div class="font-medium">{{ order.userId.name }}</div>
+                        <div class="text-xs text-slate-500">{{ order.userId.email }}</div>
+                    </div>
+                    <span *ngIf="!order.userId" class="text-slate-400">Guest</span>
+                </td>
+                <td>{{ order.items.length }} item(s)</td>
+                <td class="font-semibold">{{ order.total | currency }}</td>
+                <td><nz-tag>{{ order.paymentMethod | uppercase }}</nz-tag></td>
+                <td>
+                    <nz-badge [nzStatus]="getStatusColor(order.status)" [nzText]="order.status | uppercase"></nz-badge>
+                </td>
+            </tr>
+        </tbody>
+    </nz-table>
+</nz-card>

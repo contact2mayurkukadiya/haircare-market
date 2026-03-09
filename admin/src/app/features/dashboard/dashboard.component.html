@@ -1,0 +1,58 @@
+<div class="page-header">
+    <h2>Dashboard & Analytics</h2>
+    <p>Overview of store performance and sales metrics.</p>
+</div>
+
+<div *ngIf="loading" class="flex justify-center p-12">
+    <nz-spin nzSimple nzSize="large"></nz-spin>
+</div>
+
+<div *ngIf="!loading">
+    <div nz-row [nzGutter]="16" class="stats-row">
+        <div nz-col [nzSpan]="12">
+            <nz-card>
+                <nz-statistic [nzValue]="(totalRevenue | currency)!" [nzTitle]="'Total Revenue (Succeeded)'"
+                    [nzPrefix]="prefixTplOne" [nzValueStyle]="{ color: '#3F8600' }">
+                </nz-statistic>
+                <ng-template #prefixTplOne><span nz-icon nzType="arrow-up"></span></ng-template>
+            </nz-card>
+        </div>
+        <div nz-col [nzSpan]="12">
+            <nz-card>
+                <nz-statistic [nzValue]="successfulTxCount" [nzTitle]="'Successful Transactions'">
+                </nz-statistic>
+            </nz-card>
+        </div>
+    </div>
+
+    <!-- Daily Revenue (Line Chart) -->
+    <nz-card class="mt-6" nzTitle="Revenue Performance (Daily)">
+        <div style="display: block; width: 100%; height: 300px;">
+            <canvas #lineChart baseChart [data]="lineChartData" [options]="lineChartOptions" [type]="'line'">
+            </canvas>
+        </div>
+    </nz-card>
+
+    <div nz-row [nzGutter]="16" class="mt-6">
+        <!-- Monthly Revenue (Bar Chart) -->
+        <div nz-col [nzSpan]="14">
+            <nz-card nzTitle="Monthly Revenue (Current Year)">
+                <div style="display: block; width: 100%; height: 350px;">
+                    <canvas #barChart baseChart [data]="barChartData" [options]="barChartOptions" [type]="'bar'">
+                    </canvas>
+                </div>
+            </nz-card>
+        </div>
+
+        <!-- Category Revenue (Doughnut Chart) -->
+        <div nz-col [nzSpan]="10">
+            <nz-card nzTitle="Revenue by Category">
+                <div style="display: block; width: 100%; height: 350px;">
+                    <canvas #doughnutChart baseChart [data]="doughnutChartData" [options]="doughnutChartOptions"
+                        [type]="'doughnut'">
+                    </canvas>
+                </div>
+            </nz-card>
+        </div>
+    </div>
+</div>
