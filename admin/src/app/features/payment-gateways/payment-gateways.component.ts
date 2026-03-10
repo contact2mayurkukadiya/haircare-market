@@ -11,6 +11,7 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzBadgeModule } from 'ng-zorro-antd/badge';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { NzSelectModule } from 'ng-zorro-antd/select';
 
 interface GatewayConfig {
   gateway: 'stripe' | 'paypal' | 'upi';
@@ -30,7 +31,8 @@ interface GatewayConfig {
     NzInputModule,
     NzIconModule,
     NzBadgeModule,
-    NzSpinModule
+    NzSpinModule,
+    NzSelectModule
   ],
   templateUrl: './payment-gateways.component.html',
   styleUrl: './payment-gateways.component.scss'
@@ -49,6 +51,10 @@ export class PaymentGatewaysComponent implements OnInit {
   showStripePublishableKey = false;
   showStripeSecret = false;
   showStripeWebhookSecret = false;
+
+  paypalCreds = { clientId: '', clientSecret: '', mode: 'sandbox' };
+  showPaypalClientId = false;
+  showPaypalClientSecret = false;
 
   ngOnInit() {
     this.loadConfigs();
@@ -74,6 +80,14 @@ export class PaymentGatewaysComponent implements OnInit {
           this.stripeCreds.secretKey = stripeConfig.credentials['secretKey'] || '';
           this.stripeCreds.webhookSecret = stripeConfig.credentials['webhookSecret'] || '';
         }
+
+        const paypalConfig = this.gateways.find(g => g.gateway === 'paypal');
+        if (paypalConfig?.credentials) {
+          this.paypalCreds.clientId = paypalConfig.credentials['clientId'] || '';
+          this.paypalCreds.clientSecret = paypalConfig.credentials['clientSecret'] || '';
+          this.paypalCreds.mode = paypalConfig.credentials['mode'] || 'sandbox';
+        }
+
         this.loading = false;
       },
       error: () => {
@@ -91,7 +105,6 @@ export class PaymentGatewaysComponent implements OnInit {
     const gateway = this.gateways.find(g => g.gateway === 'stripe');
     if (!gateway) return;
 
-    // Send the current credentials to the backend
     const credUpdate: Record<string, string> = {
       publishableKey: this.stripeCreds.publishableKey,
       secretKey: this.stripeCreds.secretKey,
@@ -99,6 +112,19 @@ export class PaymentGatewaysComponent implements OnInit {
     };
 
     this.saveConfig('stripe', { enabled: gateway.enabled, credentials: credUpdate });
+  }
+
+  savePaypalCreds() {
+    const gateway = this.gateways.find(g => g.gateway === 'paypal');
+    if (!gateway) return;
+
+    const credUpdate: Record<string, string> = {
+      clientId: this.paypalCreds.clientId,
+      clientSecret: this.paypalCreds.clientSecret,
+      mode: this.paypalCreds.mode,
+    };
+
+    this.saveConfig('paypal', { enabled: gateway.enabled, credentials: credUpdate });
   }
 
   private saveConfig(gatewayId: string, payload: any) {
@@ -118,6 +144,12 @@ export class PaymentGatewaysComponent implements OnInit {
           this.stripeCreds.publishableKey = updatedConfig.credentials['publishableKey'] || '';
           this.stripeCreds.secretKey = updatedConfig.credentials['secretKey'] || '';
           this.stripeCreds.webhookSecret = updatedConfig.credentials['webhookSecret'] || '';
+        }
+
+        if (gatewayId === 'paypal') {
+          this.paypalCreds.clientId = updatedConfig.credentials['clientId'] || '';
+          this.paypalCreds.clientSecret = updatedConfig.credentials['clientSecret'] || '';
+          this.paypalCreds.mode = updatedConfig.credentials['mode'] || 'sandbox';
         }
       },
       error: () => {

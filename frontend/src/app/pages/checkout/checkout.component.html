@@ -15,7 +15,8 @@
                 <!-- Render current step component dynamically based on state -->
                 <app-shipping-step *ngIf="currentStep === 1"></app-shipping-step>
                 <app-payment-step *ngIf="currentStep === 2"></app-payment-step>
-                <app-stripe-payment-step *ngIf="currentStep === 3"></app-stripe-payment-step>
+                <app-stripe-payment-step *ngIf="currentStep === 3 && selectedGateway === 'stripe'"></app-stripe-payment-step>
+                <app-paypal-payment-step *ngIf="currentStep === 3 && selectedGateway === 'paypal'"></app-paypal-payment-step>
                 <app-confirmation-step *ngIf="currentStep === 4"></app-confirmation-step>
             </div>
         </div>

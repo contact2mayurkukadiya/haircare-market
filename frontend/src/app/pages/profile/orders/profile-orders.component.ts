@@ -73,6 +73,39 @@ export class ProfileOrdersComponent implements OnInit {
         return map[status] ?? status;
     }
 
+    /** Map payment method to an NzTag color */
+    gatewayColor(method: string): string {
+        const map: Record<string, string> = {
+            stripe: 'geekblue',
+            paypal: 'blue',
+            upi: 'orange',
+            cod: 'default',
+        };
+        return map[method] ?? 'default';
+    }
+
+    /** Map payment method to a display label */
+    gatewayLabel(method: string): string {
+        const map: Record<string, string> = {
+            stripe: 'Stripe',
+            paypal: 'PayPal',
+            upi: 'UPI',
+            cod: 'COD',
+        };
+        return map[method] ?? method;
+    }
+
+    /** Map payment method to an icon name */
+    gatewayIcon(method: string): string {
+        const map: Record<string, string> = {
+            stripe: 'credit-card',
+            paypal: 'alipay-circle',
+            upi: 'qrcode',
+            cod: 'shop',
+        };
+        return map[method] ?? 'wallet';
+    }
+
     /** Compute item subtotal */
     itemSubtotal(price: number, qty: number): number {
         return price * qty;

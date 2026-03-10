@@ -40,7 +40,7 @@ export class CheckoutService {
 
     // APIs
     getEnabledGateways() {
-        return this.api.get<Array<{ gateway: string, enabled: boolean }>>('/payments/gateways');
+        return this.api.get<Array<{ gateway: string; enabled: boolean; publicKey?: string; clientId?: string }>>('/payments/gateways');
     }
 
     createOrder(payload: any) {
@@ -49,5 +49,17 @@ export class CheckoutService {
 
     createStripeIntent(orderId: string) {
         return this.api.post<{ clientSecret: string }>('/payments/stripe/intent', { orderId });
+    }
+
+    createPayPalOrder(orderId: string) {
+        return this.api.post<{ paypalOrderId: string }>('/payments/paypal/order', { orderId });
+    }
+
+    capturePayPalOrder(paypalOrderId: string, orderId: string) {
+        return this.api.post<{ success: boolean }>('/payments/paypal/capture', { paypalOrderId, orderId });
+    }
+
+    failPayPalOrder(orderId: string) {
+        return this.api.post<{ success: boolean }>('/payments/paypal/fail', { orderId });
     }
 }

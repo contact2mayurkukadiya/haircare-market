@@ -58,19 +58,22 @@ export class PaymentGatewayConfigsService {
         }));
     }
 
-    /** Find enabled gateways — returns gateway name + enabled flag ONLY. Called by user-facing API. */
-    async findEnabled(): Promise<Array<{ gateway: string; enabled: boolean; publicKey?: string }>> {
+    /** Find enabled gateways — returns gateway name + enabled flag + public credentials only. Called by user-facing API. */
+    async findEnabled(): Promise<Array<{ gateway: string; enabled: boolean; publicKey?: string; clientId?: string }>> {
         const docs = await this.configModel.find({ enabled: true }).lean().exec();
         return docs.map((d) => {
             let publicKey: string | undefined;
-            if (d.gateway === 'stripe' && d.credentials && d.credentials['publishableKey']) {
-                try {
-                    publicKey = this.decrypt(d.credentials['publishableKey']);
-                } catch {
-                    publicKey = undefined;
-                }
+            let clientId: string | undefined;
+
+            if (d.gateway === 'stripe' && d.credentials?.['publishableKey']) {
+                try { publicKey = this.decrypt(d.credentials['publishableKey']); } catch { /* ignore */ }
             }
-            return { gateway: d.gateway, enabled: d.enabled, publicKey };
+
+            if (d.gateway === 'paypal' && d.credentials?.['clientId']) {
+                try { clientId = this.decrypt(d.credentials['clientId']); } catch { /* ignore */ }
+            }
+
+            return { gateway: d.gateway, enabled: d.enabled, publicKey, clientId };
         });
     }
 

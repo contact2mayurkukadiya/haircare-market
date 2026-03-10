@@ -118,6 +118,15 @@
     border-radius: 12px;
 }
 
+.gateway-tag {
+    font-size: 0.7rem;
+    font-weight: 600;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
 .order-summary-row {
     display: flex;
     align-items: center;

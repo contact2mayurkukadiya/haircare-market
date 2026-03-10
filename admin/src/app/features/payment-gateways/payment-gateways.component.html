@@ -72,7 +72,7 @@
     </nz-card>
 
 
-    <!-- PayPal Card (Coming Soon / UI Only) -->
+    <!-- PayPal Card -->
     <nz-card class="gateway-card" [class.enabled]="getGatewayConfig('paypal').enabled">
         <div class="card-header">
             <div class="brand">
@@ -87,9 +87,46 @@
                     [nzLoading]="saving['paypal']"></nz-switch>
             </div>
         </div>
+
         <div class="card-body">
             <p class="description">Accept payments directly from PayPal accounts.</p>
-            <div class="alert-info">PayPal integration will be implemented in a future update.</div>
+
+            <div class="creds-form">
+                <div class="form-group">
+                    <label>Client ID <span class="badge-secure">Encrypted in DB</span></label>
+                    <nz-input-group [nzSuffix]="paypalClientIdSuffix">
+                        <input [type]="showPaypalClientId ? 'text' : 'password'" nz-input
+                            placeholder="AYour-PayPal-Client-ID..." [(ngModel)]="paypalCreds.clientId" />
+                    </nz-input-group>
+                    <ng-template #paypalClientIdSuffix>
+                        <span nz-icon [nzType]="showPaypalClientId ? 'eye-invisible' : 'eye'"
+                            (click)="showPaypalClientId = !showPaypalClientId" class="pwd-toggle"></span>
+                    </ng-template>
+                </div>
+
+                <div class="form-group">
+                    <label>Client Secret <span class="badge-secure">Encrypted in DB</span></label>
+                    <nz-input-group [nzSuffix]="paypalClientSecretSuffix">
+                        <input [type]="showPaypalClientSecret ? 'text' : 'password'" nz-input
+                            placeholder="EYour-PayPal-Client-Secret..." [(ngModel)]="paypalCreds.clientSecret" />
+                    </nz-input-group>
+                    <ng-template #paypalClientSecretSuffix>
+                        <span nz-icon [nzType]="showPaypalClientSecret ? 'eye-invisible' : 'eye'"
+                            (click)="showPaypalClientSecret = !showPaypalClientSecret" class="pwd-toggle"></span>
+                    </ng-template>
+                </div>
+
+                <div class="form-group">
+                    <label>Mode</label>
+                    <nz-select [(ngModel)]="paypalCreds.mode" nzPlaceHolder="Select mode" style="width: 100%;">
+                        <nz-option nzValue="sandbox" nzLabel="Sandbox (Testing)"></nz-option>
+                        <nz-option nzValue="live" nzLabel="Live (Production)"></nz-option>
+                    </nz-select>
+                </div>
+
+                <button nz-button nzType="primary" [nzLoading]="saving['paypal']"
+                    (click)="savePaypalCreds()">Save PayPal Credentials</button>
+            </div>
         </div>
     </nz-card>
 

@@ -1,0 +1,40 @@
+<div class="step-container">
+    <h3>Pay with PayPal</h3>
+    <p class="subtitle">Click the PayPal button below to complete your payment securely.</p>
+
+    <!-- Initializing -->
+    <div *ngIf="loading" class="loading-state">
+        <nz-spin nzSimple nzSize="large"></nz-spin>
+        <p class="mt-4 text-slate-500">Initializing PayPal...</p>
+    </div>
+
+    <!-- Capturing payment after approval -->
+    <div *ngIf="capturing" class="loading-state">
+        <nz-spin nzSimple nzSize="large"></nz-spin>
+        <p class="mt-4 text-slate-500">Processing your payment, please wait...</p>
+    </div>
+
+    <!-- Definitive failure (SDK error or capture failure) -->
+    <div *ngIf="paymentFailed && !capturing" class="failed-state">
+        <div class="failed-icon">✕</div>
+        <h4>Payment Failed</h4>
+        <p class="error-detail">{{ error }}</p>
+        <button nz-button nzType="primary" nzSize="large" (click)="tryAnotherMethod()">
+            Try Another Payment Method
+        </button>
+    </div>
+
+    <!-- Normal state: buttons + error banner + actions -->
+    <div [hidden]="loading || capturing || paymentFailed">
+
+        <div *ngIf="error" class="error-msg">{{ error }}</div>
+
+        <div class="paypal-container">
+            <div id="paypal-button-container"></div>
+        </div>
+
+        <div class="step-actions mt-8">
+            <button nz-button type="button" nzSize="large" (click)="goBack()">Choose Another Method</button>
+        </div>
+    </div>
+</div>

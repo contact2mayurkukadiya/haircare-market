@@ -45,6 +45,10 @@
                     <nz-tag [nzColor]="statusColor(order.status)" class="status-tag">
                         {{ statusLabel(order.status) }}
                     </nz-tag>
+                    <nz-tag [nzColor]="gatewayColor(order.paymentMethod)" class="gateway-tag">
+                        <span nz-icon [nzType]="gatewayIcon(order.paymentMethod)" nzTheme="outline"></span>
+                        {{ gatewayLabel(order.paymentMethod) }}
+                    </nz-tag>
                 </div>
                 <div class="order-summary-row">
                     <span class="order-date">

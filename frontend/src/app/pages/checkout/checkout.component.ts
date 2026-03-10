@@ -7,6 +7,7 @@ import { CartService } from '../../core/services/cart.service';
 import { ShippingStepComponent } from './shipping-step/shipping-step.component';
 import { PaymentStepComponent } from './payment-step/payment-step.component';
 import { StripePaymentStepComponent } from './stripe-payment-step/stripe-payment-step.component';
+import { PaypalPaymentStepComponent } from './paypal-payment-step/paypal-payment-step.component';
 import { ConfirmationStepComponent } from './confirmation-step/confirmation-step.component';
 
 import { NzStepsModule } from 'ng-zorro-antd/steps';
@@ -21,6 +22,7 @@ import { Router } from '@angular/router';
     ShippingStepComponent,
     PaymentStepComponent,
     StripePaymentStepComponent,
+    PaypalPaymentStepComponent,
     ConfirmationStepComponent
   ],
   templateUrl: './checkout.component.html',
@@ -32,21 +34,21 @@ export class CheckoutComponent implements OnInit {
   private router = inject(Router);
 
   currentStep = 1;
+  selectedGateway: string | null = null;
 
   ngOnInit() {
     this.checkout.reset();
 
-    // Auto-calculate order total based on cart items
     if (this.cart.items().length > 0) {
       this.checkout.updateState({ orderTotal: this.cart.total() });
     } else {
-      // If cart is empty, redirect back to cart or products
       this.router.navigate(['/cart']);
       return;
     }
 
     this.checkout.state$.subscribe(state => {
       this.currentStep = state.step;
+      this.selectedGateway = state.selectedGateway;
     });
   }
 
