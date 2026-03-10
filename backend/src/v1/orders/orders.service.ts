@@ -151,14 +151,28 @@ export class OrdersService {
         await tx.save();
     }
 
+    private mapOrderImages(order: any): any {
+        if (order?.items?.length) {
+            order.items = order.items.map((item: any) => {
+                if (item.image && !item.image.startsWith('http') && !item.image.startsWith('/static')) {
+                    item.image = `${process.env.SERVER_URL}/static/thumbnails/${item.image}`;
+                }
+                return item;
+            });
+        }
+        return order;
+    }
+
     /** Get all orders for a specific user. */
-    async findByUser(userId: string): Promise<OrderDocument[]> {
-        return this.orderModel.find({ userId: new Types.ObjectId(userId) }).sort({ createdAt: -1 }).exec();
+    async findByUser(userId: string): Promise<any[]> {
+        const orders = await this.orderModel.find({ userId: new Types.ObjectId(userId) }).sort({ createdAt: -1 }).lean().exec();
+        return orders.map(o => this.mapOrderImages(o));
     }
 
     /** Get all orders — for admin analytics. */
-    async findAll(): Promise<OrderDocument[]> {
-        return this.orderModel.find().sort({ createdAt: -1 }).populate('userId', 'name email').exec();
+    async findAll(): Promise<any[]> {
+        const orders = await this.orderModel.find().sort({ createdAt: -1 }).populate('userId', 'name email').lean().exec();
+        return orders.map(o => this.mapOrderImages(o));
     }
 
     /** Get all transactions — for admin analytics. */

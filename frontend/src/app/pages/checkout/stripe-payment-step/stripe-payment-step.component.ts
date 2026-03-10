@@ -52,7 +52,9 @@ export class StripePaymentStepComponent implements OnInit, AfterViewInit {
           name: i.product.name,
           price: i.product.price,
           quantity: i.quantity,
-          image: i.product.images?.[0] ?? undefined
+          image: i.product.images?.[0]
+            ? i.product.images[0].split('/').pop()
+            : undefined
         })),
         shippingAddress: state.shippingAddress,
         paymentMethod: state.selectedGateway
