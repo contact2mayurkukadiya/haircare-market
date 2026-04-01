@@ -1,0 +1,14 @@
+<div class="step-container">
+    <h3>Cash on Delivery</h3>
+    <p class="subtitle">
+        Place your order now and pay in cash at delivery. After delivery, our admin will verify payment via OTP.
+    </p>
+
+    <div class="step-actions mt-8">
+        <button nz-button type="button" nzSize="large" (click)="goBack()">Back</button>
+        <button nz-button nzType="primary" nzSize="large" class="btn-accent" [nzLoading]="placingOrder"
+            (click)="placeCodOrder()">
+            Place COD Order
+        </button>
+    </div>
+</div>

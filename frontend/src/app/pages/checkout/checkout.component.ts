@@ -8,6 +8,7 @@ import { ShippingStepComponent } from './shipping-step/shipping-step.component';
 import { PaymentStepComponent } from './payment-step/payment-step.component';
 import { StripePaymentStepComponent } from './stripe-payment-step/stripe-payment-step.component';
 import { PaypalPaymentStepComponent } from './paypal-payment-step/paypal-payment-step.component';
+import { CodPaymentStepComponent } from './cod-payment-step/cod-payment-step.component';
 import { ConfirmationStepComponent } from './confirmation-step/confirmation-step.component';
 
 import { NzStepsModule } from 'ng-zorro-antd/steps';
@@ -23,6 +24,7 @@ import { Router } from '@angular/router';
     PaymentStepComponent,
     StripePaymentStepComponent,
     PaypalPaymentStepComponent,
+    CodPaymentStepComponent,
     ConfirmationStepComponent
   ],
   templateUrl: './checkout.component.html',

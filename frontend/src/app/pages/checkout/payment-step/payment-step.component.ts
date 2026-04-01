@@ -25,7 +25,7 @@ export class PaymentStepComponent implements OnInit {
 
   gateways: Gateway[] = [];
   loading = true;
-  selectedGateway: 'stripe' | 'paypal' | 'upi' | null = null;
+  selectedGateway: 'stripe' | 'paypal' | 'upi' | 'cod' | null = null;
   error = '';
 
   ngOnInit() {
@@ -34,12 +34,12 @@ export class PaymentStepComponent implements OnInit {
     this.checkout.getEnabledGateways().subscribe({
       next: (data) => {
         // Enforce the logic that only enabled gateways are shown
-        this.gateways = data.filter(g => g.enabled);
+        this.gateways = [...data.filter(g => g.enabled), { gateway: 'cod', enabled: true }];
         this.loading = false;
 
         // Auto-select if only one available
         if (this.gateways.length === 1 && !this.selectedGateway) {
-          this.selectedGateway = this.gateways[0].gateway as 'stripe' | 'paypal' | 'upi';
+          this.selectedGateway = this.gateways[0].gateway as 'stripe' | 'paypal' | 'upi' | 'cod';
         }
       },
       error: () => {
@@ -53,7 +53,7 @@ export class PaymentStepComponent implements OnInit {
     return this.gateways.some(g => g.gateway === gatewayName);
   }
 
-  selectGateway(gw: 'stripe' | 'paypal' | 'upi') {
+  selectGateway(gw: 'stripe' | 'paypal' | 'upi' | 'cod') {
     this.selectedGateway = gw;
   }
 

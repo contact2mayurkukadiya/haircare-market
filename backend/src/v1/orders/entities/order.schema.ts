@@ -53,6 +53,18 @@ export class Order {
 
     @Prop()
     notes?: string;
+
+    @Prop()
+    codOtpHash?: string;
+
+    @Prop()
+    codOtpExpiresAt?: Date;
+
+    @Prop()
+    codOtpSentAt?: Date;
+
+    @Prop()
+    codOtpVerifiedAt?: Date;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

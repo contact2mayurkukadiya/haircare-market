@@ -63,6 +63,7 @@ export class TransactionsComponent implements OnInit {
       case 'stripe': return 'purple';
       case 'paypal': return 'blue';
       case 'upi': return 'orange';
+      case 'cod': return 'green';
       default: return 'default';
     }
   }

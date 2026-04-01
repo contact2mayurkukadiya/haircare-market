@@ -54,7 +54,7 @@ export class PaymentsController {
     private readonly paypalService: PaypalPaymentService,
     private readonly ordersService: OrdersService,
     private readonly configService: ConfigService,
-  ) {}
+  ) { }
 
   @ApiBearerAuth('access-token')
   @ApiOperation({

@@ -63,4 +63,28 @@ export class EmailService {
             throw new InternalServerErrorException('Failed to send password reset OTP email. Please try again.');
         }
     }
+
+    async sendCodOrderOtpEmail(to: string, name: string, otp: string, orderId: string): Promise<void> {
+        const html = `
+            <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+                <h2>Cash on Delivery Verification</h2>
+                <p>Hello ${name},</p>
+                <p>Your OTP for COD verification is:</p>
+                <p style="font-size: 24px; font-weight: 700; letter-spacing: 2px;">${otp}</p>
+                <p>Order ID: ${orderId}</p>
+                <p>This OTP expires in 10 minutes.</p>
+            </div>
+        `;
+
+        try {
+            await this.transporter.sendMail({
+                from: `"Haircare Market" <${this.configService.get<string>('smtp.user')}>`,
+                to,
+                subject: 'Your COD verification OTP',
+                html,
+            });
+        } catch {
+            throw new InternalServerErrorException('Failed to send COD OTP email. Please try again.');
+        }
+    }
 }

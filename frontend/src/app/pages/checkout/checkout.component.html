@@ -17,6 +17,7 @@
                 <app-payment-step *ngIf="currentStep === 2"></app-payment-step>
                 <app-stripe-payment-step *ngIf="currentStep === 3 && selectedGateway === 'stripe'"></app-stripe-payment-step>
                 <app-paypal-payment-step *ngIf="currentStep === 3 && selectedGateway === 'paypal'"></app-paypal-payment-step>
+                <app-cod-payment-step *ngIf="currentStep === 3 && selectedGateway === 'cod'"></app-cod-payment-step>
                 <app-confirmation-step *ngIf="currentStep === 4"></app-confirmation-step>
             </div>
         </div>

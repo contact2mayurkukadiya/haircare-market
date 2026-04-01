@@ -34,7 +34,8 @@ import {
   OrderedListOutline,
   HistoryOutline,
   DashboardOutline,
-  ArrowUpOutline
+  ArrowUpOutline,
+  ShopOutline
 } from '@ant-design/icons-angular/icons';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 
@@ -63,7 +64,8 @@ const icons: IconDefinition[] = [
   OrderedListOutline,
   HistoryOutline,
   DashboardOutline,
-  ArrowUpOutline
+  ArrowUpOutline,
+  ShopOutline
 ];
 
 export const appConfig: ApplicationConfig = {

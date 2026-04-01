@@ -13,7 +13,7 @@ export class Transaction {
     @Prop({ type: Types.ObjectId, ref: 'users', required: true })
     userId!: Types.ObjectId;
 
-    @Prop({ enum: ['stripe', 'paypal', 'upi'], required: true })
+    @Prop({ enum: ['stripe', 'paypal', 'upi', 'cod'], required: true })
     gateway!: string;
 
     /** e.g. Stripe PaymentIntent ID: pi_xxx */

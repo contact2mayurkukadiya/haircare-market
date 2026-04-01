@@ -11,8 +11,9 @@
                 <th>Customer</th>
                 <th>Items</th>
                 <th>Total</th>
-                <th>Method</th>
+                <th>Payment Method</th>
                 <th>Status</th>
+                <th>COD Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -30,6 +31,39 @@
                 <td><nz-tag>{{ order.paymentMethod | uppercase }}</nz-tag></td>
                 <td>
                     <nz-badge [nzStatus]="getStatusColor(order.status)" [nzText]="order.status | uppercase"></nz-badge>
+                </td>
+                <td>
+                    <div class="cod-actions" *ngIf="order.paymentMethod === 'cod'; else noCodAction">
+                        <button
+                            nz-button
+                            nzType="default"
+                            nzSize="small"
+                            (click)="sendOtp(order)"
+                            [nzLoading]="sendingOtpByOrderId[order._id]"
+                            [disabled]="!canSendOtp(order)">
+                            Send OTP
+                        </button>
+
+                        <div class="verify-row" *ngIf="canVerifyOtp(order)">
+                            <input
+                                nz-input
+                                placeholder="Enter OTP"
+                                [(ngModel)]="otpByOrderId[order._id]"
+                                [disabled]="order.status !== 'pending'" />
+                            <button
+                                nz-button
+                                nzType="primary"
+                                nzSize="small"
+                                (click)="verifyOtp(order)"
+                                [nzLoading]="verifyingOtpByOrderId[order._id]"
+                                [disabled]="order.status !== 'pending'">
+                                Verify OTP
+                            </button>
+                        </div>
+                    </div>
+                    <ng-template #noCodAction>
+                        <span class="text-slate-400">-</span>
+                    </ng-template>
                 </td>
             </tr>
         </tbody>

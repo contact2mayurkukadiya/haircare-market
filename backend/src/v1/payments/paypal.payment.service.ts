@@ -165,10 +165,17 @@ export class PaypalPaymentService {
 
     /**
      * Mark an order as failed when the PayPal JS SDK itself errors (before or during approval).
-     * Only acts if the order is still pending — idempotent if already failed.
+     * Uses an atomic conditional update so a concurrent successful capture cannot be
+     * overwritten — if the order is no longer 'pending' the update is a no-op.
      */
     async recordSdkFailure(internalOrderId: string, userId: string): Promise<void> {
-        await this.ordersService.updateStatus(internalOrderId, 'failed');
+        const updated = await this.ordersService.updateStatusIfPending(internalOrderId, 'failed');
+        if (!updated) {
+            this.logger.log(
+                `Order ${internalOrderId} — skipped SDK failure mark (status already transitioned)`,
+            );
+            return;
+        }
         await this.ordersService.recordTransaction({
             orderId: internalOrderId,
             userId,

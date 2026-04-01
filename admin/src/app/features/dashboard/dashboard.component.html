@@ -11,7 +11,7 @@
     <div nz-row [nzGutter]="16" class="stats-row">
         <div nz-col [nzSpan]="12">
             <nz-card>
-                <nz-statistic [nzValue]="(totalRevenue | currency)!" [nzTitle]="'Total Revenue (Succeeded)'"
+                <nz-statistic [nzValue]="(totalRevenue | currency)!" [nzTitle]="'Total Revenue (Paid Orders)'"
                     [nzPrefix]="prefixTplOne" [nzValueStyle]="{ color: '#3F8600' }">
                 </nz-statistic>
                 <ng-template #prefixTplOne><span nz-icon nzType="arrow-up"></span></ng-template>

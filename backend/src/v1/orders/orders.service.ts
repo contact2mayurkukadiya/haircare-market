@@ -1,10 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
+import * as bcrypt from 'bcrypt';
 
 import { Order, OrderDocument, OrderStatus } from './entities/order.schema';
 import { Transaction, TransactionDocument, TransactionStatus } from './entities/transaction.schema';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class OrdersService {
@@ -13,7 +15,12 @@ export class OrdersService {
         @InjectModel(Transaction.name) private readonly txModel: Model<TransactionDocument>,
         @InjectModel('Categories') private readonly categoryModel: Model<any>,
         @InjectModel('Products') private readonly productModel: Model<any>,
+        private readonly emailService: EmailService,
     ) { }
+
+    private generateOtp(): string {
+        return Math.floor(100000 + Math.random() * 900000).toString();
+    }
 
     /** Aggregates total revenue grouped by product category for 'paid' orders.
      * Scale-Optimized Hybrid Approach:
@@ -121,10 +128,25 @@ export class OrdersService {
         return order.save();
     }
 
-    /** Update order status. Called by webhook handler after payment confirmation. */
+    /** Update order status unconditionally. Called by Stripe webhook handler. */
     async updateStatus(orderId: string, status: OrderStatus): Promise<void> {
         const result = await this.orderModel.updateOne({ _id: orderId }, { $set: { status } });
         if (result.matchedCount === 0) throw new NotFoundException(`Order ${orderId} not found`);
+    }
+
+    /**
+     * Atomically transition an order from 'pending' to the given status.
+     * The filter includes `status: 'pending'` so the update is a no-op if another
+     * concurrent request has already changed the status (e.g. a successful capture).
+     * Returns true if the update was applied, false if the order was already in a
+     * terminal state.
+     */
+    async updateStatusIfPending(orderId: string, status: OrderStatus): Promise<boolean> {
+        const result = await this.orderModel.updateOne(
+            { _id: orderId, status: 'pending' },
+            { $set: { status } },
+        );
+        return result.modifiedCount > 0;
     }
 
     /** Record a transaction log entry. */
@@ -178,5 +200,68 @@ export class OrdersService {
     /** Get all transactions — for admin analytics. */
     async findAllTransactions(): Promise<TransactionDocument[]> {
         return this.txModel.find().sort({ createdAt: -1 }).exec();
+    }
+
+    async sendCodOtp(orderId: string): Promise<{ message: string }> {
+        const order = await this.orderModel.findById(orderId).populate('userId', 'name email').lean().exec();
+        if (!order) throw new NotFoundException(`Order ${orderId} not found`);
+        if (order.paymentMethod !== 'cod') throw new BadRequestException('OTP is supported only for COD orders');
+        if (order.status !== 'pending') throw new BadRequestException(`Cannot send OTP for ${order.status} order`);
+
+        const user = order.userId as { name?: string; email?: string } | undefined;
+        if (!user?.email) throw new BadRequestException('Customer email not found for this order');
+
+        const otp = this.generateOtp();
+        const codOtpHash = await bcrypt.hash(otp, 10);
+        const codOtpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
+        const codOtpSentAt = new Date();
+
+        await this.orderModel.updateOne(
+            { _id: orderId },
+            {
+                $set: { codOtpHash, codOtpExpiresAt, codOtpSentAt },
+                $unset: { codOtpVerifiedAt: '' },
+            },
+        );
+
+        await this.emailService.sendCodOrderOtpEmail(user.email, user.name || 'Customer', otp, orderId);
+        return { message: 'COD OTP sent to customer email' };
+    }
+
+    async verifyCodOtp(orderId: string, otp: string): Promise<{ message: string }> {
+        const order = await this.orderModel.findById(orderId).lean().exec();
+        if (!order) throw new NotFoundException(`Order ${orderId} not found`);
+        if (order.paymentMethod !== 'cod') throw new BadRequestException('OTP verification is supported only for COD orders');
+        if (order.status !== 'pending') throw new BadRequestException(`Order is already ${order.status}`);
+        if (!order.codOtpHash || !order.codOtpExpiresAt) {
+            throw new BadRequestException('OTP has not been sent for this order');
+        }
+        if (new Date() > new Date(order.codOtpExpiresAt)) {
+            throw new BadRequestException('OTP has expired. Please send OTP again');
+        }
+
+        const isOtpValid = await bcrypt.compare(otp, order.codOtpHash);
+        if (!isOtpValid) throw new BadRequestException('Invalid OTP');
+
+        await this.orderModel.updateOne(
+            { _id: orderId },
+            {
+                $set: { status: 'paid', codOtpVerifiedAt: new Date() },
+                $unset: { codOtpHash: '', codOtpExpiresAt: '' },
+            },
+        );
+
+        await this.recordTransaction({
+            orderId,
+            userId: (order.userId as Types.ObjectId).toString(),
+            gateway: 'cod',
+            gatewayTxId: `cod_${orderId}_${Date.now()}`,
+            status: 'succeeded',
+            amount: Math.round(order.total * 100),
+            currency: 'usd',
+            metadata: { source: 'admin-cod-otp-verify' },
+        });
+
+        return { message: 'COD payment verified and order marked successful' };
     }
 }

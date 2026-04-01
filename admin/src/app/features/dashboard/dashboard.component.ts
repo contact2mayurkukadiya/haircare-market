@@ -94,18 +94,21 @@ export class DashboardComponent implements OnInit {
     fetchAnalytics() {
         this.loading = true;
         forkJoin({
+            orders: this.api.get<any[]>('/orders/admin/all'),
             transactions: this.api.get<any[]>('/orders/admin/transactions'),
             categoryRevenue: this.api.get<any[]>('/orders/admin/analytics/category-revenue'),
             monthlyRevenue: this.api.get<any[]>('/orders/admin/analytics/monthly-revenue')
         }).subscribe({
             next: (res) => {
+                const paidOrders = res.orders.filter(o => o.status === 'paid');
+
                 // Summary stats
                 const succeeded = res.transactions.filter(t => t.status === 'succeeded');
                 this.successfulTxCount = succeeded.length;
-                this.totalRevenue = succeeded.reduce((sum, t) => sum + (t.amount / 100), 0);
+                this.totalRevenue = paidOrders.reduce((sum, order) => sum + (order.total || 0), 0);
 
                 // Daily Line Chart
-                this.initDailyChart(res.transactions);
+                this.initDailyChart(paidOrders);
 
                 // Category Doughnut Chart
                 this.doughnutChartData.labels = res.categoryRevenue.map(c => c.category);
@@ -135,9 +138,9 @@ export class DashboardComponent implements OnInit {
 
     initDailyChart(data: any[]) {
         const dailyData: Record<string, number> = {};
-        data.filter(t => t.status === 'succeeded').forEach(t => {
-            const date = new Date(t.createdAt).toLocaleDateString();
-            dailyData[date] = (dailyData[date] || 0) + (t.amount / 100);
+        data.forEach(order => {
+            const date = new Date(order.createdAt).toLocaleDateString();
+            dailyData[date] = (dailyData[date] || 0) + (order.total || 0);
         });
         const sortedDates = Object.keys(dailyData).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
         this.lineChartData.labels = sortedDates;

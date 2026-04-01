@@ -6,7 +6,7 @@ import { BehaviorSubject } from 'rxjs';
 export interface CheckoutState {
     step: 1 | 2 | 3 | 4;
     shippingAddress: any;
-    selectedGateway: 'stripe' | 'paypal' | 'upi' | null;
+    selectedGateway: 'stripe' | 'paypal' | 'upi' | 'cod' | null;
     orderId: string | null;
     clientSecret: string | null;
     orderTotal: number;

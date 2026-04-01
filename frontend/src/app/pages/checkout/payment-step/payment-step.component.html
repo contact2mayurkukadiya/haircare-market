@@ -60,6 +60,21 @@
                 <div class="radio-circle" [class.active]="selectedGateway === 'upi'"></div>
             </div>
         </div>
+
+        <!-- COD Option -->
+        <div class="gateway-option" *ngIf="getGateway('cod')" [class.selected]="selectedGateway === 'cod'"
+            (click)="selectGateway('cod')">
+            <div class="gw-brand">
+                <span nz-icon nzType="wallet" nzTheme="outline" class="brand-icon orange"></span>
+                <div class="gw-info">
+                    <h4>Cash on Delivery</h4>
+                    <p>Pay cash when your order is delivered</p>
+                </div>
+            </div>
+            <div class="gw-radio">
+                <div class="radio-circle" [class.active]="selectedGateway === 'cod'"></div>
+            </div>
+        </div>
     </div>
 
     <div class="step-actions mt-8">

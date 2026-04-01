@@ -7,6 +7,11 @@ import { AuthGuard } from '@nestjs/passport';
 import { AdminAuthGuard } from '../admin/guards/admin-auth.guard';
 import { JwtUserPayload } from '../auth/strategies/jwt.strategy';
 
+class VerifyCodOtpDto {
+    orderId!: string;
+    otp!: string;
+}
+
 @ApiTags('Orders')
 @Controller({ version: '1', path: 'orders' })
 export class OrdersController {
@@ -61,5 +66,21 @@ export class OrdersController {
     @Get('admin/analytics/monthly-revenue')
     getMonthlyRevenue() {
         return this.ordersService.getMonthlyRevenue();
+    }
+
+    @ApiBearerAuth('access-token')
+    @ApiOperation({ summary: 'Send COD OTP email for an order (admin)' })
+    @UseGuards(AdminAuthGuard)
+    @Post('admin/cod/send-otp')
+    sendCodOtp(@Body() body: { orderId: string }) {
+        return this.ordersService.sendCodOtp(body.orderId);
+    }
+
+    @ApiBearerAuth('access-token')
+    @ApiOperation({ summary: 'Verify COD OTP and mark order successful (admin)' })
+    @UseGuards(AdminAuthGuard)
+    @Post('admin/cod/verify-otp')
+    verifyCodOtp(@Body() body: VerifyCodOtpDto) {
+        return this.ordersService.verifyCodOtp(body.orderId, body.otp);
     }
 }
